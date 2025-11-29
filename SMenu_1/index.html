@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script type="text/javascript" src="data.json"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.4">
+    <title>Slot 1: SMenu_1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=FontName" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, .body {
+            margin: 0;
+            padding: 0;
+            width: 1080px;
+            height: 1920px;
+            max-width: 1080px;
+            max-height: 1920px;
+            position: relative;
+            background-color: #fff;
+        }
+
+        #MessageViewBody a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        p {
+            line-height: inherit
+        }
+
+        .desktop_hide,
+        .desktop_hide table {
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+        }
+
+        .image_block img+div {
+            display: none;
+        }
+
+        /* Start - Template specific custom CSS */
+        .template-container {
+            table-layout: fixed;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt; background-color: #fff;
+            width: 1080px;
+            height: 1920px;
+            max-width: 1080px;
+            max-height: 1920px;
+            overflow: hidden;
+      		zoom: 1;
+        }
+        .template-container .template-container-column {
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+            overflow: hidden;
+      		zoom: 1;
+        }
+
+        .bg-image {
+            background-color: #fff;
+            background-image: url(BG_IMG);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            table-layout: fixed;
+            vertical-align: top;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+      		zoom: 1;
+        }
+        .bg-image .bg-image-column {
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+            overflow: hidden;
+      		zoom: 1;
+        }
+
+        .content-wrapper {
+            color: #ffffff;
+            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            table-layout: fixed;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            overflow: hidden;
+      		zoom: 1;
+        }
+        .content-wrapper .content-wrapper-column {
+            font-weight: 600;
+            text-align: left;
+            padding: 0;
+            vertical-align: top;
+            border: 0;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+      		zoom: 1;
+        }
+
+        .resto-info {
+            width: 100%;
+            height: auto;
+            table-layout: fixed;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            background-color: transparent;
+            position: absolute;
+            left: 110px;
+            top: 990px;
+            z-index: 2;
+        }
+        .resto-info td {
+            width: 100%;
+            height: auto;
+            text-align: left;
+        }
+        .resto-info td img {
+            display: inline-block;
+            height: auto;
+            border: 0;
+            width: 200px;
+            cursor: pointer;
+        }
+
+        .text-top {
+            cursor: pointer;
+            position: absolute;
+            top: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            background-color: transparent;
+        }
+        .text-top td {
+            width:100%;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .text-top .text-top-line-1, .text-top .text-top-line-2 {
+            color: #fff;
+            font-size: 110px;
+            line-height: 110px;
+            font-weight: 400;
+            text-align: center;
+            display: block;
+            margin-bottom: 20px;
+            font-family: FontName;
+        }
+        .text-top .text-top-line-2 {
+            margin-bottom: 100px;
+            text-transform: uppercase;
+            color: #ff8938;
+            font-size: 120px;
+            line-height: 120px;
+            font-weight: 900;
+            font-family: FontName;
+        }
+        .text-top .cutlery {
+            height: 130px;
+            width: auto;
+            display: block;
+            margin: 0 auto 30px auto;
+        }
+        .text-top .website {
+            border-radius: 15px;
+            border: solid 1px #ffffff;
+            padding: 15px 40px;
+            display: inline-block;
+            color: #ffffff;
+            font-family: FontName;
+        }
+
+        .footer {
+            width: 100%;
+            table-layout: fixed;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            position: absolute;
+            bottom: 220px;
+            left: 110px;
+            background-color: transparent;
+            z-index: 5;
+        }
+        .footer .footer-col-1 {
+            width:100%;
+            text-align: left;
+
+        }
+        .footer-fodex-logo {
+            width: auto;
+            height: 100px;
+            display: inline-block;
+        }
+        /* End: Template specific custom CSS */
+
+        @media (max-width:1080px) {
+            .desktop_hide table.icons-inner {
+                display: inline-block !important;
+            }
+
+            .icons-inner {
+                text-align: center;
+            }
+
+            .icons-inner td {
+                margin: 0 auto;
+            }
+
+            .mobile_hide {
+                display: none;
+            }
+
+            .row-content {
+                width: 100% !important;
+            }
+
+            .stack .column {
+                width: 100%;
+                display: block;
+            }
+
+            .mobile_hide {
+                min-height: 0;
+                max-height: 0;
+                max-width: 0;
+                overflow: hidden;
+                font-size: 0px;
+            }
+
+            .desktop_hide,
+            .desktop_hide table {
+                display: table !important;
+                max-height: none !important;
+            }
+        }
+    </style>
+    <script>
+	function clickMe(section) {
+        if( !section ){
+            return;
+        }
+        var s = section.includes(":") ? section.split(":")[0] : section;
+        console.log(s);
+    }
+    </script>
+</head>
+
+<body class="body">
+
+    <table
+        border="0px"
+        cellpadding="0"
+        cellspacing="0"
+        class = "template-container">
+        <tbody >
+            <tr>
+                <td class="template-container-column">
+
+                    <table
+                        align="center"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        style="background-color: #fff;
+            		       background-image: url(BG_IMG);
+            		       background-position: center;
+            	               background-repeat: no-repeat;
+            		       background-size: cover;
+           		       table-layout: fixed;
+            		       vertical-align: top;
+            		       width: 100%;
+                               height: 100%;"
+                        id="BG_IMG">
+                        <tbody>
+                            <tr>
+                                <td class="bg-image-column">
+
+                                    <!-- Start: BG Image Header -->
+                                    <table
+                                        align="center"
+                                        border="0"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        class="content-wrapper"
+                                        role="presentation">
+                                        <tbody>
+                                            <tr>
+                                                <td class="content-wrapper-column">
+                                                    <!-- End: BG Image Header -->
+
+                                                    <!-- Start: Content -->
+                                                    <table onclick="clickMe('RESTO_INFO')"
+                                                        border="0"
+                                                        cellpadding="0"
+                                                        cellspacing="0"
+                                                        class="resto-info"
+                                                        role="presentation">
+                                                        <tr>
+                                                            <td>
+                                                                <img
+                                                                alt="Yourlogo"
+                                                                id="LOGO"
+                                                                src="LOGO"
+                                                                title="Yourlogo"/>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+
+                                                    <table onclick="clickMe('TXT_TOP')"
+                                                        border="0"
+                                                        cellpadding="0"
+                                                        cellspacing="0"
+                                                        class="text-top"
+                                                        role="presentation"
+                                                        width= "100%">
+                                                        <tr>
+                                                            <td>
+                                                                <div id="TEXT_TOP_LINE_1" class="text-top-line-1">TEXT_TOP_LINE_1</div>
+                                                                <div id="TEXT_TOP_LINE_2" class="text-top-line-2">TEXT_TOP_LINE_2</div>
+                                                                <img src="CUTLERY" alt="cutlery" style="height: 130px; width: auto; display: block; margin: 0 auto 30px auto;">
+                                                                <div id="TEXT_TOP_LINE_3" class="website">TEXT_TOP_LINE_3</div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+
+                                                    <table
+                                                        border="0"
+                                                        cellpadding="0"
+                                                        cellspacing="0"
+                                                        class="footer"
+                                                        role="presentation">
+                                                        <tr>
+                                                            <td class="footer-col-1">
+                                                                <img
+                                                                    src="FODX_IMAGE"
+                                                                    alt="footer-fodex-logo"
+                                                                    style="width: auto; height: 100px; display: inline-block;"
+                                                                    title="Footer Fodex Logo"/>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+
+                                                    <!-- End: Content -->
+
+                                                <!-- Start: BG Image Footer -->
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- End: BG Image Footer -->
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+<script type="text/javascript" src="getParams.js"></script>
+</html>

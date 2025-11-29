@@ -1,0 +1,73 @@
+data={
+  "BIRTHDAY": {
+    "title": "Birthday Part",
+    "data": [
+    {
+        "key": "BG_VIDEO",
+        "type": "VIDEO",
+        "value": "BG_VIDEO.mp4",
+        "aspectratio": "9:16",
+        "height": "1920",
+        "width": "1080",
+        "type":"VIDEO",
+        "jsId":"background-video"
+      },
+      {
+        "key": "BDY_TITLE",
+        "value": "Birthday_Text_Img.png",
+        "type": "IMAGE",
+        "height": "436",
+        "width": "785",
+        "jsId":"birthday-title"
+      },
+      {
+        "key": "BDY_TEXT",
+        "value": "Ritik",
+        "type": "TEXT",
+        "jsId":"birthday-text"
+      },
+      {
+        "key": "BDY_TEXT_FontName",
+        "value": "Virtual",
+        "type": "FONT",
+        "jsId":"birthday-font"
+      },
+      {
+        "key": "BDY_PHOTO_1",
+        "type": "IMAGE",
+        "value": "Birthday-img1.png",
+        "aspectratio": "1:1",
+        "height": "920",
+        "width": "832",
+        "jsId":"birthday-photo-1"
+      },
+      {
+        "key": "BDY_PHOTO_2",
+        "type": "IMAGE",
+        "value": "Birthday-img2.png",
+        "aspectratio": "1:1",
+        "height": "920",
+        "width": "832",
+        "jsId":"birthday-photo-2"
+      },
+      {
+        "key": "BDY_PHOTO_3",
+        "type": "IMAGE",
+        "value": "Birthday-img3.png",
+        "aspectratio": "1:1",
+        "height": "920",
+        "width": "832",
+        "jsId":"birthday-photo-3"
+      },
+      {
+        "key": "TEXT_BG",
+        "type": "IMAGE",
+        "value": "Text-background.png",
+        "aspectratio": "1:1",
+        "height": "300",
+        "width": "867",
+        "jsId":"text-bg"
+      }
+    ]
+  }
+}

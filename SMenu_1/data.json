@@ -1,0 +1,52 @@
+data={
+    "RESTO_INFO": {
+      "title": "Restaurant Information",
+      "data": [
+        {
+          "key": "LOGO",
+          "type": "IMAGE",
+          "value": "your-logo.png",
+          "aspectratio": "1:1",
+          "height": "250",
+          "width": "253"
+        },
+        {
+          "key": "BG_IMG",
+          "type": "IMAGE",
+          "value": "BG_IMG.png",
+          "aspectratio": "9:16",
+          "height": "1920",
+          "width": "1080"
+        },
+        {"key": "FontName", "value": "Quotes Script", "type": "FONT"}
+      ]
+    },
+    "TXT_TOP": {
+      "title": "Top Text",
+      "data": [
+        {"key": "TEXT_TOP_LINE_1", "value": "Delicious", "type": "TEXT"},
+        {"key": "TEXT_TOP_LINE_2", "value": "FOOD MENU", "type": "TEXT"},
+        {"key": "TEXT_TOP_LINE_3", "value": "Restaurants.com", "type": "TEXT"}
+      ]
+    },
+   "STATIC":{
+    "data":[
+    	{
+    	  "key": "FODX_IMAGE",
+    	  "type": "IMAGE",
+    	  "value": "FODX_IMAGE.png",
+    	  "aspectratio": "1:1",
+    	  "height": "250",
+          "width": "253"
+        },
+        {
+    	  "key": "CUTLERY",
+    	  "type": "IMAGE",
+    	  "value": "cutlery.png",
+    	  "aspectratio": "1:1",
+    	  "height": "131",
+          "width": "148"
+        }
+    ]
+    }
+  }
