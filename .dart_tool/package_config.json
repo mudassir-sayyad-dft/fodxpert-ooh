@@ -111,15 +111,15 @@
     },
     {
       "name": "device_info_plus",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus-11.3.0",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus-12.3.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.7"
     },
     {
       "name": "device_info_plus_platform_interface",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.2",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.3",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.7"
     },
     {
       "name": "diacritic",
@@ -159,25 +159,19 @@
     },
     {
       "name": "fc_native_image_resize",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/fc_native_image_resize-0.14.2",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/fc_native_image_resize-0.15.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "ffi",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.3",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.4",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "ffmpeg_kit_flutter_android",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/ffmpeg_kit_flutter_android-1.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.7"
     },
     {
       "name": "ffmpeg_kit_flutter_new",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/ffmpeg_kit_flutter_new-1.2.1",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/ffmpeg_kit_flutter_new-4.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -339,7 +333,7 @@
     },
     {
       "name": "http",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.3.0",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -603,7 +597,7 @@
     },
     {
       "name": "pro_image_editor",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/pro_image_editor-9.8.1",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/pro_image_editor-11.14.0",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -741,49 +735,55 @@
     },
     {
       "name": "syncfusion_flutter_core",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_core-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_core-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_flutter_pdf",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_pdf-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_pdf-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_flutter_pdfviewer",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_pdfviewer-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_pdfviewer-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_flutter_signaturepad",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_signaturepad-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_flutter_signaturepad-31.2.16",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "syncfusion_pdfviewer_linux",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_linux-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_pdfviewer_macos",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_macos-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_macos-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_pdfviewer_platform_interface",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_platform_interface-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_platform_interface-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_pdfviewer_web",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_web-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_web-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "syncfusion_pdfviewer_windows",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_windows-29.2.11",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/syncfusion_pdfviewer_windows-31.2.16",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -915,7 +915,7 @@
     },
     {
       "name": "vibration_platform_interface",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/vibration_platform_interface-0.1.0",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/vibration_platform_interface-0.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -969,45 +969,45 @@
     },
     {
       "name": "webview_flutter",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter-4.11.0",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter-4.13.0",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
     {
       "name": "webview_flutter_android",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_android-4.4.1",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_android-4.10.10",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "webview_flutter_platform_interface",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_platform_interface-2.14.0",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
     {
-      "name": "webview_flutter_platform_interface",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_platform_interface-2.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "webview_flutter_plus",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_plus-0.4.15",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_plus-0.4.19",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "webview_flutter_wkwebview",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_wkwebview-3.20.0",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.4",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.9"
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.10.1",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.15.0",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.8"
     },
     {
       "name": "win32_registry",
-      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/win32_registry-1.1.5",
+      "rootUri": "file:///C:/Users/mudss/AppData/Local/Pub/Cache/hosted/pub.dev/win32_registry-2.1.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.7"
     },
     {
       "name": "xdg_directories",

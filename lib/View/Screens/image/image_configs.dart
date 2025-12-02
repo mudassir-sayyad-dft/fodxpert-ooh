@@ -43,10 +43,8 @@ class ImageConfig {
 
     // ),
     paintEditor: const PaintEditorConfigs(),
-    stickerEditor: StickerEditorConfigs(
+    stickerEditor: const StickerEditorConfigs(
       enabled: true,
-      buildStickers: (setLayer, scrollController) =>
-          StickersWidget(setLayer: setLayer),
     ),
   );
 }

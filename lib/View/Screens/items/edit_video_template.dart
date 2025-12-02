@@ -48,7 +48,7 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (url) {
-            _controler.webViewHeight().then((h) {
+            _controler.webViewHeight.then((h) {
               var height = int.parse(h.toString()).toDouble();
               if (height != _height) {
                 setState(() {
@@ -250,7 +250,7 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (url) {
-            _controler.webViewHeight().then((h) {
+            _controler.webViewHeight.then((h) {
               var height = int.parse(h.toString()).toDouble();
               if (height != _height) {
                 setState(() {

@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.0.0+14
+version: 2.0.1+15
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
@@ -34,7 +34,7 @@ dependencies:
   dio: ^5.4.3+1
   downloadsfolder: ^1.1.0
   # ffmpeg_kit_flutter: 6.0.3-LTS
-  ffmpeg_kit_flutter_new: ^1.2.1
+  ffmpeg_kit_flutter_new: ^4.0.0
   # ffmpeg_kit_flutter:
   #   path: packages/ffmpeg_kit_flutter_min/flutter/flutter
   file_picker: ^10.1.9
@@ -43,7 +43,7 @@ dependencies:
   flutter_archive: ^6.0.3
   flutter_screenutil: ^5.9.0
   flutter_svg: ^2.0.10+1
-  flutter_video_info: ^1.3.1
+  flutter_video_info: ^1.3.3
   font_awesome_flutter: ^10.8.0
   fraction: ^5.0.2
   get: ^4.6.6
@@ -55,21 +55,21 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^12.0.0+1
   pinput: ^5.0.0
-  pro_image_editor: ^9.8.0
+  pro_image_editor: ^11.10.1
   screenshot: ^3.0.0
   shared_preferences: ^2.3.2
   shimmer: ^3.0.0
   smart_auth: ^2.0.0
   video_editor_2: ^3.1.1
-  webview_flutter: ^4.8.0
-  webview_flutter_plus: ^0.4.10
+  webview_flutter: ^4.13.0
+  webview_flutter_plus: ^0.4.19
   get_thumbnail_video: ^0.6.1
   image: ^4.5.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  fc_native_image_resize: ^0.14.2
+  fc_native_image_resize: ^0.15.0
   docx_viewer: ^0.2.0
-  syncfusion_flutter_pdfviewer: ^29.2.11
+  syncfusion_flutter_pdfviewer: ^31.2.3
 
 vibration:
   dependency: transitive
