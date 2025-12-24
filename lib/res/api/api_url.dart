@@ -1,5 +1,6 @@
 class ApiUrl {
-  static const _baseUrl = "https://contentmanager.fodxpert.com/";
+  // static const _baseUrl = "https://contentmanager.fodxpert.com/";
+  static const _baseUrl = "http://192.168.1.11:3100/";
 
   static const loginEndPoint = "${_baseUrl}api/loginFromApp";
 

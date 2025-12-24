@@ -67,11 +67,18 @@ class SplashServices {
     print(authController.toc.data?.versionNumber ?? "No version");
     print(userController.currentUser.tocVersion);
 
-    if (authController.toc.data?.versionNumber ==
+    if (authController.toc.data?.versionNumber !=
         userController.currentUser.tocVersion) {
       AppServices.pushAndRemoveUntil(RouteConstants.welcome_lounge_view);
     } else {
       AppServices.pushAndRemoveUntil(RouteConstants.terms_view);
     }
+    // TODO: Revert to above after testing
+    /* if (authController.toc.data?.versionNumber ==
+        userController.currentUser.tocVersion) {
+      AppServices.pushAndRemoveUntil(RouteConstants.welcome_lounge_view);
+    } else {
+      AppServices.pushAndRemoveUntil(RouteConstants.terms_view);
+    } */
   }
 }

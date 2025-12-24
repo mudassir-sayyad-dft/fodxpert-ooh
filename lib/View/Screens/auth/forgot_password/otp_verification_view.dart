@@ -231,10 +231,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
       Utils.showErrorSnackbar(message: "Please Enter Otp to Continue.");
       return;
     }
-    if (duration <= 0) {
+    /* if (duration <= 0) {
       Utils.showErrorSnackbar(message: "Invalid Otp");
       return;
-    }
+    } */
     if (widget.forgotPassword) {
       // final res =
       //     await authController.validateOtp(otp: otp);
@@ -259,12 +259,19 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
     otpController.clear();
     if (value) {
       print(value);
-      if (authController.toc.data?.versionNumber ==
+      if (authController.toc.data?.versionNumber !=
           Get.find<UserController>().currentUser.tocVersion) {
         value ? AppServices.pushTo(RouteConstants.welcome_lounge_view) : null;
       } else {
         AppServices.pushTo(RouteConstants.terms_view);
       }
+      // TODO: Revert to above after testing
+      /* if (authController.toc.data?.versionNumber ==
+          Get.find<UserController>().currentUser.tocVersion) {
+        value ? AppServices.pushTo(RouteConstants.welcome_lounge_view) : null;
+      } else {
+        AppServices.pushTo(RouteConstants.terms_view);
+      } */
     }
   }
 }

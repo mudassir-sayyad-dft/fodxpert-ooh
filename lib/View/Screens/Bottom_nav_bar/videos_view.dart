@@ -63,26 +63,32 @@ class _VideosViewState extends State<VideosView> {
           FunctionsController.checkFileIsVideo(
               adsController.ads[currentVideoIndex].thumbnail)) {
         print(adsController.ads[currentVideoIndex].thumbnail);
-        _controller = VideoPlayerController.networkUrl(
-            Uri.parse(FunctionsController.checkFileIsVideo(
-                    adsController.ads[currentVideoIndex].thumbnail)
-                ? adsController.ads[currentVideoIndex].thumbnail
-                : adsController.ads[currentVideoIndex].fileName),
-            videoPlayerOptions: VideoPlayerOptions())
-          ..setLooping(false)
-          ..initialize().then((_) {
-            setState(() {
-              _controller.play();
+        final chosenUrl = FunctionsController.checkFileIsVideo(
+                adsController.ads[currentVideoIndex].thumbnail)
+            ? adsController.ads[currentVideoIndex].thumbnail
+            : adsController.ads[currentVideoIndex].fileName;
+        try {
+          print('Initializing video player with URL: $chosenUrl');
+          _controller = VideoPlayerController.networkUrl(Uri.parse(chosenUrl),
+              videoPlayerOptions: VideoPlayerOptions())
+            ..setLooping(false)
+            ..initialize().then((_) {
+              setState(() {
+                _controller.play();
+              });
+            }).catchError((e) {
+              print('Video initialize failed: $e');
+            })
+            ..addListener(() {
+              if (_controller.value.position == _controller.value.duration) {
+                _controller.seekTo(const Duration(seconds: 0));
+                _controller.pause();
+              }
+              setState(() {});
             });
-          })
-          ..addListener(() {
-            if (_controller.value.position == _controller.value.duration) {
-              // Video has completed, you can handle it as needed
-              _controller.seekTo(const Duration(seconds: 0));
-              _controller.pause();
-            }
-            setState(() {});
-          });
+        } catch (e) {
+          print('Error creating VideoPlayerController: $e');
+        }
       }
     }
   }
@@ -359,21 +365,18 @@ class _VideosViewState extends State<VideosView> {
                                                   ad: ad),
                                               AppServices.addWidth(20),
                                               Expanded(
-                                                  child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                      ad.fileName
-                                                          .split("/")
-                                                          .last
-                                                          .split("-")
-                                                          .last,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      ad.displayShortName(),
                                                       maxLines: 3,
                                                       style:
-                                                          textTheme.fs_14_bold),
-                                                  AppServices.addHeight(4.h),
-                                                  Text(
+                                                          textTheme.fs_14_bold,
+                                                    ),
+                                                    AppServices.addHeight(4.h),
+                                                    Text(
                                                       ad.checkIsVideo()
                                                           ? "Video"
                                                           : ad.checkIsImage()
@@ -383,9 +386,11 @@ class _VideosViewState extends State<VideosView> {
                                                           .fs_14_regular
                                                           .copyWith(
                                                               color: GetColors
-                                                                  .secondary))
-                                                ],
-                                              )),
+                                                                  .secondary),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                               PopupMenuButton(
                                                   color: GetColors.white,
                                                   surfaceTintColor:
@@ -406,7 +411,7 @@ class _VideosViewState extends State<VideosView> {
                                                                     .checkIsVideo(),
                                                                 onDelete: () =>
                                                                     onDelete(ad
-                                                                        .fileName));
+                                                                        .displayName));
                                                           });
                                                     }
                                                   },
@@ -488,7 +493,7 @@ class _VideosViewState extends State<VideosView> {
   }
 
   onDownload(AdsModel ad, AdsController adsController) async {
-    if (ad.fileName.endsWith(".zip")) {
+    if (ad.isZipFile()) {
       await adsController.downloadFile(
           context: context, file: ad.thumbnail, fileName: ad.fileName);
     } else {
@@ -631,8 +636,8 @@ class _VideosViewState extends State<VideosView> {
     }
   }
 
-  onDelete(String fileName) async {
-    await Get.find<AdsController>().deleteAd(fileName: fileName);
+  onDelete(String displayName) async {
+    await Get.find<AdsController>().deleteAd(fileName: displayName);
   }
 }
 
@@ -779,7 +784,7 @@ class GetImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (ad.fileName.endsWith(".zip")) {
+    if (ad.isZipFile()) {
       return Image.network(
         ad.thumbnail,
         width: 90.w,
@@ -996,23 +1001,30 @@ class _ThumbnailPreviewWithVideoState extends State<ThumbnailPreviewWithVideo> {
   initState() {
     super.initState();
     if (FunctionsController.checkFileIsVideo(widget.ad.thumbnail)) {
-      _controller = VideoPlayerController.networkUrl(
-          Uri.parse(widget.ad.thumbnail),
-          videoPlayerOptions: VideoPlayerOptions())
-        ..setLooping(false)
-        ..initialize().then((_) {
-          setState(() {
-            _controller.play();
+      try {
+        print(
+            'Thumbnail preview initializing video with: ${widget.ad.thumbnail}');
+        _controller = VideoPlayerController.networkUrl(
+            Uri.parse(widget.ad.thumbnail),
+            videoPlayerOptions: VideoPlayerOptions())
+          ..setLooping(false)
+          ..initialize().then((_) {
+            setState(() {
+              _controller.play();
+            });
+          }).catchError((e) {
+            print('Thumbnail Video init failed: $e');
+          })
+          ..addListener(() {
+            if (_controller.value.position == _controller.value.duration) {
+              _controller.seekTo(const Duration(seconds: 0));
+              _controller.pause();
+            }
+            setState(() {});
           });
-        })
-        ..addListener(() {
-          if (_controller.value.position == _controller.value.duration) {
-            // Video has completed, you can handle it as needed
-            _controller.seekTo(const Duration(seconds: 0));
-            _controller.pause();
-          }
-          setState(() {});
-        });
+      } catch (e) {
+        print('Error creating thumbnail VideoPlayerController: $e');
+      }
     }
   }
 
@@ -1029,7 +1041,7 @@ class _ThumbnailPreviewWithVideoState extends State<ThumbnailPreviewWithVideo> {
     // print(widget.ad.videoTemplateThumbnail);
     return ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
-        child: widget.ad.fileName.endsWith(".zip")
+        child: widget.ad.isZipFile()
             ? Image.network(
                 widget.ad.thumbnail,
                 width: 90.w,
@@ -1123,7 +1135,7 @@ class ThumbnailPreviewWithGenerateThumbnailOfVideo extends StatelessWidget {
       final videoTemplateThumbnail = ad.videoTemplateThumbnail.value;
       return ClipRRect(
           borderRadius: BorderRadius.circular(10.r),
-          child: ad.fileName.endsWith(".zip")
+          child: ad.isZipFile()
               ? (FunctionsController.checkFileIsVideo(ad.thumbnail)
                   ? (videoTemplateThumbnail.isNotEmpty
                       ? Image.file(

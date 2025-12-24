@@ -66,7 +66,19 @@ class FunctionsController {
       "webm",
       "mpeg-2"
     ];
-    return (videoFormats.any((element) => filePath.endsWith(".$element")));
+    try {
+      final uri = Uri.parse(filePath);
+      final path = uri.path; // safe: excludes query params
+      final idx = path.lastIndexOf('.');
+      if (idx >= 0 && idx < path.length - 1) {
+        final ext = path.substring(idx + 1).toLowerCase();
+        return videoFormats.contains(ext);
+      }
+    } catch (e) {
+      // fall through to legacy check below
+    }
+    return (videoFormats
+        .any((element) => filePath.toLowerCase().contains(".$element")));
   }
 
   static List<String> allowedFormats = [
@@ -93,7 +105,20 @@ class FunctionsController {
       "png",
     ];
 
-    return (imageFormats.any((element) => filePath.endsWith(".$element")));
+    try {
+      final uri = Uri.parse(filePath);
+      final path = uri.path;
+      final idx = path.lastIndexOf('.');
+      if (idx >= 0 && idx < path.length - 1) {
+        final ext = path.substring(idx + 1).toLowerCase();
+        return imageFormats.contains(ext);
+      }
+    } catch (e) {
+      // fall back
+    }
+
+    return (imageFormats
+        .any((element) => filePath.toLowerCase().contains(".$element")));
   }
 
   static Future<String> resizeImage(File srcFile) async {
@@ -170,8 +195,17 @@ class FunctionsController {
 
       final documentDirectory = await getDownloadsDirectory() ??
           await getApplicationDocumentsDirectory();
-      final file = File(
-          '${documentDirectory.path}/${image.split("/").last.split("=").last}');
+      String fileName;
+      try {
+        final uri = Uri.parse(image);
+        fileName = uri.pathSegments.isNotEmpty
+            ? Uri.decodeComponent(uri.pathSegments.last)
+            : image.split('/').last;
+      } catch (_) {
+        fileName = image.split('/').last;
+      }
+
+      final file = File('${documentDirectory.path}/$fileName');
 
       await file.writeAsBytes(response.data);
 

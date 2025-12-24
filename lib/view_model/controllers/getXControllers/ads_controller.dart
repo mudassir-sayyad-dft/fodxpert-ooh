@@ -131,7 +131,7 @@ class AdsController extends GetxController {
           videoData: (fileName: fileName, screenId: _selectedScreen));
       if (response != null) {
         _ads.removeWhere(
-            (element) => element.fileName.trim() == fileName.trim());
+            (element) => element.displayName.trim() == fileName.trim());
       }
     } catch (e) {
       Utils.showErrorSnackbar(message: e.toString(), showLogout: true);
