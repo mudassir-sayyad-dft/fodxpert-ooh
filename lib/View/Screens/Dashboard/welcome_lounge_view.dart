@@ -144,7 +144,7 @@ class _WelcomeLoungeViewState extends State<WelcomeLoungeView> {
                                                                 GetColors.grey6,
                                                             child: Icon(
                                                                 data.zone ==
-                                                                        "Landscape"
+                                                                        "landscape"
                                                                     ? Icons
                                                                         .stay_current_landscape
                                                                     : Icons

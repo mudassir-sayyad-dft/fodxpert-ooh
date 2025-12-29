@@ -12,6 +12,7 @@ import 'package:fodex_new/main.dart';
 import 'package:fodex_new/repository/ads_repository.dart';
 import 'package:fodex_new/res/colors.dart';
 import 'package:fodex_new/res/utils/utils.dart';
+import 'package:fodex_new/res/utils/video_compression_utils.dart';
 import 'package:fodex_new/view_model/controllers/function_controller.dart';
 import 'package:fodex_new/view_model/models/Ads/ads_model.dart';
 import 'package:fodex_new/view_model/models/screens_model/screens_model.dart';
@@ -145,23 +146,69 @@ class AdsController extends GetxController {
       File? previousFile,
       required String sampleTemplateName,
       bool isZip = false,
-      String templateType = ""}) async {
+      String templateType = "",
+      bool compressVideo = true,
+      VideoQuality quality = VideoQuality.medium}) async {
     // setLoading(true);
     try {
       print("Add new add try working here --->>");
+
+      File processedFile = file;
+
+      // Compress video if it's not a zip and compression is enabled
+      if (!isZip &&
+          FunctionsController.checkFileIsVideo(fileName) &&
+          compressVideo) {
+        try {
+          final originalSize = await VideoCompressionUtils.getFileSizeMB(file);
+          print("Original video size: ${originalSize.toStringAsFixed(2)} MB");
+
+          Utils.showInfoSnackbar(
+              message: "Compressing video for faster upload...");
+
+          processedFile = await VideoCompressionUtils.compressVideo(
+            file,
+            quality: quality,
+          );
+
+          final compressedSize =
+              await VideoCompressionUtils.getFileSizeMB(processedFile);
+          final savedPercentage =
+              ((originalSize - compressedSize) / originalSize * 100)
+                  .toStringAsFixed(1);
+
+          print(
+              "Compressed video size: ${compressedSize.toStringAsFixed(2)} MB (Saved $savedPercentage%)");
+          Utils.showSuccessSnackbar(
+            message:
+                "Video compressed successfully! Saved $savedPercentage% space",
+          );
+        } catch (e) {
+          print("Compression failed: $e");
+          Utils.showErrorSnackbar(
+              message: "Compression failed, uploading original video");
+          // Fall back to original file if compression fails
+          processedFile = file;
+        }
+      }
+
       final response = await _repo.addNewAd(
-          file: file,
+          file: processedFile,
           _selectedScreen,
           fileName: fileName,
           screenName: _selectedScreenName,
           sampleTemplateName: sampleTemplateName,
-          isZip: isZip,
           templateType: templateType);
 
       if (previousFile != null) {
         if (await previousFile.exists()) {
           await previousFile.delete();
         }
+      }
+
+      // Delete compressed file if different from original
+      if (processedFile.path != file.path && await processedFile.exists()) {
+        await processedFile.delete();
       }
 
       // if (!isZip) {
@@ -175,7 +222,8 @@ class AdsController extends GetxController {
       // await downloadFile(url: response.fileName);
       // await response.generateThumbnail();
       // Utils.showSuccessSnackbar(message: "Got Thumbail step 5 done........");
-      pushAd(response);
+      // Refresh list so videos_view shows the latest creatives immediately
+      await getAds();
     } catch (e) {
       print("Error in addNewAd");
       print(e.toString());
@@ -188,19 +236,64 @@ class AdsController extends GetxController {
       {required String previousFileNetworkUrl,
       required String previousFileUrl,
       bool isZip = false,
-      String templateType = ""}) async {
+      String templateType = "",
+      bool compressVideo = true,
+      VideoQuality quality = VideoQuality.medium}) async {
     // setLoading(true);
     try {
+      File processedFile = file;
+
+      // Compress video if it's not a zip and compression is enabled
+      if (!isZip &&
+          FunctionsController.checkFileIsVideo(file.path) &&
+          compressVideo) {
+        try {
+          final originalSize = await VideoCompressionUtils.getFileSizeMB(file);
+          print("Original video size: ${originalSize.toStringAsFixed(2)} MB");
+
+          Utils.showInfoSnackbar(
+              message: "Compressing video for faster upload...");
+
+          processedFile = await VideoCompressionUtils.compressVideo(
+            file,
+            quality: quality,
+          );
+
+          final compressedSize =
+              await VideoCompressionUtils.getFileSizeMB(processedFile);
+          final savedPercentage =
+              ((originalSize - compressedSize) / originalSize * 100)
+                  .toStringAsFixed(1);
+
+          print(
+              "Compressed video size: ${compressedSize.toStringAsFixed(2)} MB (Saved $savedPercentage%)");
+          Utils.showSuccessSnackbar(
+            message:
+                "Video compressed successfully! Saved $savedPercentage% space",
+          );
+        } catch (e) {
+          print("Compression failed: $e");
+          Utils.showErrorSnackbar(
+              message: "Compression failed, uploading original video");
+          processedFile = file;
+        }
+      }
+
       final response = await _repo.updateCreative(
           screenName: _selectedScreenName,
-          file: file,
+          file: processedFile,
           screenId: selectedScreen,
-          isZip: isZip,
           fileName: previousFileNetworkUrl.split("/").last,
           templateType: templateType);
       print(response);
       print(response.fileName);
       print('*****************');
+
+      // Delete compressed file if different from original
+      if (processedFile.path != file.path && await processedFile.exists()) {
+        await processedFile.delete();
+      }
+
       if (!isZip) {
         if (await file.exists()) {
           await file.delete();

@@ -1,9 +1,5 @@
-// ignore_for_file: must_be_immutable
-
 import 'dart:async';
 
-// import 'package:another_telephony/telephony.dart';
-// import 'package:another_telephony/telephony.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fodex_new/View/Components/Loaders/full_screen_loader.dart';
@@ -13,8 +9,6 @@ import 'package:fodex_new/view_model/controllers/getXControllers/auth_controller
 import 'package:fodex_new/view_model/controllers/getXControllers/user_controller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-// import 'package:otp_text_field/otp_field_style.dart';
-// import 'package:otp_text_field/style.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smart_auth/smart_auth.dart';
 
@@ -28,13 +22,9 @@ import '../../../Components/textFields/primary_text_field.dart';
 
 class OtpVerificationView extends StatefulWidget {
   final bool forgotPassword;
-  // final bool? withEmail;
-  // final Map<String, dynamic> data;
   const OtpVerificationView({
     super.key,
     required this.forgotPassword,
-    // this.withEmail,
-    // required this.data
   });
 
   @override
@@ -56,7 +46,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
   @override
   void initState() {
     super.initState();
-    // getOtpFromMsg();
     startTimer();
     smsRetriever = SmsRetrieverImpl(
       SmartAuth(),
@@ -95,7 +84,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
               children: [
-                // AppServices.addHeight(AppServices.getScreenHeight * (widget.forgotPassword ? 0.02 : 0.08).h),
                 Image.asset(GetImages.enter_otp_vector, height: 200.h),
                 AppServices.addHeight(50),
                 Text("Enter OTP",
@@ -131,25 +119,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                     }
                   },
                 ),
-                // OTPTextField(
-                //   length: widget.forgotPassword ? 6 : 4,
-                //   width: AppServices.getScreenWidth,
-                //   capitalText: !widget.forgotPassword,
-                //   keyboardType: TextInputType.number,
-                //   otpFieldStyle: OtpFieldStyle(
-                //       backgroundColor: GetColors.grey6,
-                //       borderColor: GetColors.black.withValues(alpha:0.25)),
-                //   fieldWidth: AppServices.getScreenWidth /
-                //       (widget.forgotPassword ? 8 : 6.5).w,
-                //   style: textTheme.fs_16_medium,
-                //   textFieldAlignment: MainAxisAlignment.spaceAround,
-                //   fieldStyle: FieldStyle.box,
-                //   controller: otpController,
-                //   onCompleted: (pin) {
-                //     setState(() => otp = pin);
-                //     // verifyOtp();
-                //   },
-                // ),
                 widget.forgotPassword
                     ? Column(
                         children: [
@@ -196,7 +165,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                                     }
                                     startTimer();
                                     otpController.clear();
-                                    // final authController = Get.find<AuthController>();
                                   },
                                   child: Text("Resend OTP",
                                       style: textTheme.fs_12_regular.copyWith(
@@ -231,37 +199,17 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
       Utils.showErrorSnackbar(message: "Please Enter Otp to Continue.");
       return;
     }
-    /* if (duration <= 0) {
-      Utils.showErrorSnackbar(message: "Invalid Otp");
-      return;
-    } */
-    if (widget.forgotPassword) {
-      // final res =
-      //     await authController.validateOtp(otp: otp);
-      // if (res) {
-      authController.moveToCreatePassword(otp);
-      // }
-      if (_password.text.isNotEmpty &&
-          (_password.text.trim() == _confirmPassword.text.trim())) {
-        final response = await authController.resetPassword(_password.text);
-        if (response) {
-          AppServices.pushAndRemove(RouteConstants.login);
-        }
-      } else {
-        Utils.showErrorSnackbar(
-            message: "Password and confirm password doesn't match.");
-      }
-      otpController.clear();
-      return;
-    }
 
     final value = await authController.validateOtp(otp: otp);
     otpController.clear();
+
     if (value) {
       print(value);
       if (authController.toc.data?.versionNumber !=
           Get.find<UserController>().currentUser.tocVersion) {
-        value ? AppServices.pushTo(RouteConstants.welcome_lounge_view) : null;
+        value
+            ? AppServices.pushAndRemoveUntil(RouteConstants.welcome_lounge_view)
+            : null;
       } else {
         AppServices.pushTo(RouteConstants.terms_view);
       }

@@ -275,7 +275,7 @@ class _VideosViewState extends State<VideosView> {
                                   children: [
                                     Icon(
                                         adsController.selectedScreenData.zone ==
-                                                "Landscape"
+                                                "landscape"
                                             ? Icons.stay_current_landscape
                                             : Icons.stay_current_portrait,
                                         size: 30.sp),
@@ -503,7 +503,12 @@ class _VideosViewState extends State<VideosView> {
 
   onEdit(AdsModel ad) async {
     final controllerData = Get.find<AdsController>();
-    if (ad.checkIsVideo()) {
+
+    // Check if it's a zip file first (video zip or image zip templates)
+    if (ad.isZipFile()) {
+      Get.find<TemplatesController>().setPreviewData([]);
+      await downloadAndUnzipTemplate(ad);
+    } else if (ad.checkIsVideo()) {
       controllerData.setLoading(true);
       final file =
           await FunctionsController.fileFromImageUrl(image: ad.fileName);
@@ -537,15 +542,6 @@ class _VideosViewState extends State<VideosView> {
             _initializeVideoController();
           }));
       controllerData.setLoading(false);
-    } else {
-      // controllerData.setLoading(true);
-
-      Get.find<TemplatesController>().setPreviewData([]);
-      await downloadAndUnzipTemplate(ad);
-      // await Future.delayed(const Duration(milliseconds: 5500));
-      // Get.to(EditTemplateHtmlViewScreen(template: ad));
-
-      // controllerData.setLoading(false);
     }
   }
 
@@ -555,8 +551,19 @@ class _VideosViewState extends State<VideosView> {
     final directory = await getTemporaryDirectory();
     final temporaryDirectoryPath = '${directory.path}/fodx';
 
-    String getFileName() {
-      return template.fileName.split("/").last.split(".").first;
+    /// Generate a clean filename without query parameters or special characters
+    String getCleanFileName() {
+      // Use displayShortName() from AdsModel which already handles cleanup
+      // Then remove any remaining special characters and query params
+      String name =
+          template.displayShortName().replaceAll(RegExp(r'[^\w.-]'), '_');
+      // Remove leading/trailing underscores
+      name = name.replaceAll(RegExp(r'^_+|_+$'), '');
+      // If name is still too long, use a UUID-based fallback
+      if (name.isEmpty || name.length > 100) {
+        name = 'template_${DateTime.now().millisecondsSinceEpoch}';
+      }
+      return name;
     }
 
     controller.setLoading(true);
@@ -569,24 +576,37 @@ class _VideosViewState extends State<VideosView> {
       } catch (e) {
         print("error deleting folder");
       }
-      var path = "$temporaryDirectoryPath/templates/${getFileName()}";
+
+      final cleanFileName = getCleanFileName();
+      var path = "$temporaryDirectoryPath/templates/$cleanFileName";
 
       var fileExist = File(path);
       if (fileExist.existsSync()) {
         fileExist.deleteSync();
       }
 
-      bool downloaded = await FileStorage.downloadAndSaveImage(
-          template.fileName, getFileName());
+      // Use zipUrl if available (new API), otherwise use thumbnail or fileName (old API)
+      final downloadUrl = template.zipUrl.isNotEmpty
+          ? template.zipUrl
+          : template.thumbnail.isNotEmpty
+              ? template.thumbnail
+              : template.fileName;
+
+      bool downloaded =
+          await FileStorage.downloadAndSaveImage(downloadUrl, cleanFileName);
       String p =
-          "$temporaryDirectoryPath/templates/${getFileName()}/${getFileName().split("-").last}/index.html";
+          "$temporaryDirectoryPath/templates/$cleanFileName/$cleanFileName/index.html";
       if (downloaded) {
-        await unzipTemplate(context, getFileName(), () {
-          if (FunctionsController.checkFileIsVideo(template.thumbnail)) {
-            print("This is a video thumbnail");
+        await unzipTemplate(context, cleanFileName, () {
+          // Use type field if available to determine routing
+          if (template.type.startsWith('video/') ||
+              (template.type.isEmpty &&
+                  FunctionsController.checkFileIsVideo(template.thumbnail))) {
+            print("This is a video thumbnail template");
             AppServices.pushTo(RouteConstants.edit_template_video_view,
                 argument: {"template": template, "path": p});
           } else {
+            print("This is an image or HTML template");
             AppServices.pushTo(RouteConstants.edit_template_html_view,
                 argument: {"template": template, "path": p});
           }
@@ -595,6 +615,7 @@ class _VideosViewState extends State<VideosView> {
 
       controller.setLoading(false);
     } catch (e) {
+      print('Error downloading/unzipping template: $e');
       controller.setLoading(false);
     }
   }
@@ -1133,6 +1154,8 @@ class ThumbnailPreviewWithGenerateThumbnailOfVideo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final videoTemplateThumbnail = ad.videoTemplateThumbnail.value;
+      final thumbnailUrl = ad.getThumbnailUrl();
+
       return ClipRRect(
           borderRadius: BorderRadius.circular(10.r),
           child: ad.isZipFile()
@@ -1203,8 +1226,9 @@ class ThumbnailPreviewWithGenerateThumbnailOfVideo extends StatelessWidget {
                                         ),
                                       ),
                                     )))
-                  : Image.network(
-                      ad.thumbnail,
+                  : // Image zip - use fileUrl as thumbnail preview
+                  Image.network(
+                      thumbnailUrl,
                       width: 90.w,
                       height: 80.h,
                       fit: BoxFit.cover,

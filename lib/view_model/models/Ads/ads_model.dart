@@ -12,6 +12,9 @@ class AdsModel implements Comparable<AdsModel> {
   String displayName;
   String fileUrl;
   String thumbnail = "";
+  String zipUrl = "";
+  String type = "";
+  String adGroup = "";
   int index;
   RxString videoTemplateThumbnail = "".obs;
 
@@ -23,7 +26,10 @@ class AdsModel implements Comparable<AdsModel> {
       this.thumbnail = "",
       this.index = 0,
       this.displayName = "",
-      this.fileUrl = ""});
+      this.fileUrl = "",
+      this.zipUrl = "",
+      this.type = "",
+      this.adGroup = ""});
 
   static final baseUrl =
       "https://fodxpertandroid.s3.ap-south-1.amazonaws.com/${Get.find<UserController>().currentUser.managerID}/ads/";
@@ -36,6 +42,9 @@ class AdsModel implements Comparable<AdsModel> {
         fileName = (json['fileUrl'] ?? json['file']) as String? ?? "",
         displayName = (json['fileName'] ?? json['file']) as String? ?? "",
         thumbnail = (json['thumbnail'] ?? json['previewUrl']) as String? ?? "",
+        zipUrl = (json['zipUrl']) as String? ?? "",
+        type = (json['type']) as String? ?? "",
+        adGroup = (json['adGroup']) as String? ?? "",
         index = json['index'] ?? 0 {
     // If we only received a bare filename (old API), construct the full URL.
     if (fileName.isEmpty && json['fileName'] != null) {
@@ -164,11 +173,46 @@ class AdsModel implements Comparable<AdsModel> {
   }
 
   bool checkIsVideo() {
+    // Prefer type field if available
+    if (type.isNotEmpty) {
+      return type.startsWith('video/');
+    }
+    // Fallback to extension checking
     return FunctionsController.checkFileIsVideo(fileName);
   }
 
   bool checkIsImage() {
+    // Prefer type field if available
+    if (type.isNotEmpty) {
+      return type.startsWith('image/');
+    }
+    // Fallback to extension checking
     return FunctionsController.checkFileIsImage(fileName);
+  }
+
+  /// Returns the URL to use for thumbnail display.
+  /// For zips with type info, returns appropriate preview URL.
+  /// For image zips, returns fileUrl (since thumbnail is often empty).
+  /// For video zips, returns thumbnail if available.
+  String getThumbnailUrl() {
+    if (isZipFile()) {
+      // For image zip templates, use fileUrl as preview
+      if (type.startsWith('image/') && thumbnail.isEmpty) {
+        return fileUrl.isNotEmpty ? fileUrl : fileName;
+      }
+      // For video zip templates, use thumbnail
+      if (type.startsWith('video/') && thumbnail.isNotEmpty) {
+        return thumbnail;
+      }
+      // Fallback: use existing thumbnail if available
+      return thumbnail.isNotEmpty
+          ? thumbnail
+          : fileUrl.isNotEmpty
+              ? fileUrl
+              : fileName;
+    }
+    // For non-zip files, use fileName for images, thumbnail for videos
+    return fileName;
   }
 
   @override
