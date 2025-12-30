@@ -327,11 +327,34 @@ class _EditTemplateHtmlViewScreenState
   Future zipTemplate(
       BuildContext context, String name, Function() onZipping) async {
     Directory downloadDirectory = await getTemporaryDirectory();
+    final oldName = getFileName();
+
+    // Rename parent folder to new name if different
+    Directory oldParentDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$oldName");
+    Directory newParentDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$name");
+
+    if (oldParentDir.existsSync() && oldName != name) {
+      oldParentDir.renameSync(newParentDir.path);
+
+      // Also rename inner folder to match
+      Directory innerDir =
+          Directory("${downloadDirectory.path}/fodx/templates/$name/$oldName");
+      Directory newInnerDir =
+          Directory("${downloadDirectory.path}/fodx/templates/$name/$name");
+      if (innerDir.existsSync()) {
+        innerDir.renameSync(newInnerDir.path);
+      }
+    }
+
     Directory destinationDir =
-        Directory("${downloadDirectory.path}/fodx/templates/${getFileName()}");
-    // Place the zip inside the template folder so unzip/download paths stay consistent
-    File zipFile = File(
-        "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}.zip");
+        Directory("${downloadDirectory.path}/fodx/templates/$name");
+    // Create zip at parent level to avoid including itself
+    File zipFile =
+        File("${downloadDirectory.path}/fodx/templates/${name}_temp.zip");
+    File finalZipFile =
+        File("${downloadDirectory.path}/fodx/templates/$name/$name.zip");
 
     if (!destinationDir.existsSync()) {
       destinationDir.createSync(recursive: true);
@@ -341,12 +364,20 @@ class _EditTemplateHtmlViewScreenState
       zipFile.deleteSync();
     }
 
+    if (finalZipFile.existsSync()) {
+      finalZipFile.deleteSync();
+    }
+
     try {
       ZipFile.createFromDirectory(
         zipFile: zipFile,
         sourceDir: destinationDir,
         onZipping: (path, isDirectory, progress) {
           if (progress == 100.toDouble()) {
+            // Move zip to final location
+            if (zipFile.existsSync()) {
+              zipFile.renameSync(finalZipFile.path);
+            }
             Future.delayed(
                 const Duration(seconds: 1), () async => await onZipping());
           } else {}

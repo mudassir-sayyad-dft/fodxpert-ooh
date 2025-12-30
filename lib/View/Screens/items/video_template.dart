@@ -332,8 +332,8 @@ class _VideoTemplateScreenState extends State<VideoTemplateScreen> {
 
       await zipTemplate(context, templateName, () async {
         Directory downloadDirectory = await getTemporaryDirectory();
-        final zipFile =
-            File("${downloadDirectory.path}/fodx/templates/$templateName.zip");
+        final zipFile = File(
+            "${downloadDirectory.path}/fodx/templates/$templateName/$templateName.zip");
 
         await adsController.addNewAd(zipFile,
             fileName: zipFile.path.split("/").last,
@@ -362,9 +362,34 @@ class _VideoTemplateScreenState extends State<VideoTemplateScreen> {
   Future zipTemplate(
       BuildContext context, String name, Function() onZipping) async {
     Directory downloadDirectory = await getTemporaryDirectory();
-    File zipFile = File("${downloadDirectory.path}/fodx/templates/$name.zip");
-    Directory destinationDir = Directory(
-        "${downloadDirectory.path}/fodx/templates/${widget.template.id}");
+    final oldName = widget.template.id;
+
+    // Rename parent folder to new name if different
+    Directory oldParentDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$oldName");
+    Directory newParentDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$name");
+
+    if (oldParentDir.existsSync() && oldName != name) {
+      oldParentDir.renameSync(newParentDir.path);
+
+      // Also rename inner folder to match
+      Directory innerDir =
+          Directory("${downloadDirectory.path}/fodx/templates/$name/$oldName");
+      Directory newInnerDir =
+          Directory("${downloadDirectory.path}/fodx/templates/$name/$name");
+      if (innerDir.existsSync()) {
+        innerDir.renameSync(newInnerDir.path);
+      }
+    }
+
+    // Create zip at parent level to avoid including itself
+    File zipFile =
+        File("${downloadDirectory.path}/fodx/templates/${name}_temp.zip");
+    File finalZipFile =
+        File("${downloadDirectory.path}/fodx/templates/$name/$name.zip");
+    Directory destinationDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$name");
 
     try {
       ZipFile.createFromDirectory(
@@ -372,6 +397,10 @@ class _VideoTemplateScreenState extends State<VideoTemplateScreen> {
         sourceDir: destinationDir,
         onZipping: (path, isDirectory, progress) {
           if (progress == 100.toDouble()) {
+            // Move zip to final location
+            if (zipFile.existsSync()) {
+              zipFile.renameSync(finalZipFile.path);
+            }
             Future.delayed(
                 const Duration(seconds: 3), () async => await onZipping());
           } else {}

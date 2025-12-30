@@ -195,25 +195,70 @@ class FunctionsController {
 
       final documentDirectory = await getDownloadsDirectory() ??
           await getApplicationDocumentsDirectory();
-      String fileName;
+      
+      String fileName = '${DateTime.now().millisecondsSinceEpoch}';
+      
       try {
-        final uri = Uri.parse(image);
-        fileName = uri.pathSegments.isNotEmpty
-            ? Uri.decodeComponent(uri.pathSegments.last)
-            : image.split('/').last;
+        // Remove query parameters and fragments from URL
+        String cleanUrl = image.split('?').first.split('#').first;
+        
+        // Extract just the filename from the path
+        List<String> pathSegments = cleanUrl.split('/');
+        String lastSegment = pathSegments.isNotEmpty ? pathSegments.last : '';
+        
+        // Decode URI component if needed
+        if (lastSegment.isNotEmpty) {
+          try {
+            lastSegment = Uri.decodeComponent(lastSegment);
+          } catch (_) {}
+        }
+        
+        // Extract extension from original filename
+        String extension = '';
+        if (lastSegment.contains('.')) {
+          extension = '.${lastSegment.split('.').last.toLowerCase()}';
+          // Validate extension is reasonable length
+          if (extension.length > 10) {
+            extension = '';
+          }
+        }
+        
+        // Only use extracted filename if it's reasonable length (< 50 chars)
+        if (lastSegment.isNotEmpty && lastSegment.length < 50 && 
+            !lastSegment.contains('?') && !lastSegment.contains('#')) {
+          fileName = '${lastSegment.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')}';
+        } else {
+          // Use timestamp with extension
+          fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
+        }
       } catch (_) {
-        fileName = image.split('/').last;
+        // If anything fails, use timestamp with common extensions
+        if (image.toLowerCase().endsWith('.jpg') || image.contains('.jpg?')) {
+          fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+        } else if (image.toLowerCase().endsWith('.png') || image.contains('.png?')) {
+          fileName = '${DateTime.now().millisecondsSinceEpoch}.png';
+        } else if (image.toLowerCase().endsWith('.gif') || image.contains('.gif?')) {
+          fileName = '${DateTime.now().millisecondsSinceEpoch}.gif';
+        } else if (image.toLowerCase().endsWith('.webp') || image.contains('.webp?')) {
+          fileName = '${DateTime.now().millisecondsSinceEpoch}.webp';
+        } else {
+          fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+        }
       }
-
-      final file = File('${documentDirectory.path}/$fileName');
-
+      
+      // Extra safety: ensure filename doesn't contain special characters that could cause path issues
+      fileName = fileName.replaceAll(RegExp(r'[?#&=\s]'), '_');
+      
+      final filePath = '${documentDirectory.path}/$fileName';
+      print('Saving image to: $filePath');
+      
+      final file = File(filePath);
       await file.writeAsBytes(response.data);
 
       return file;
     } catch (e) {
-      // Handle error
-      print("Error: $e");
-      rethrow; // Re-throwing the exception for the caller to handle
+      print("Error in fileFromImageUrl: $e");
+      rethrow;
     }
   }
 

@@ -211,13 +211,18 @@ class _HtmlViewScreenState extends State<HtmlViewScreen> {
 
   saveImageToTemplateFolder(String imageName, String image) async {
     if (imageName != "FODX_IMAGE.png") {
-      final base64Image = image.replaceAll("data:image/png;base64,", "");
-      final bytes = base64Decode(base64Image);
-      Directory downloadDirectory = await getTemporaryDirectory();
-      final imagePath =
-          '${downloadDirectory.path}/fodx/templates/${widget.template.id}/${widget.template.id}/$imageName';
-      final imageFile = File(imagePath);
-      imageFile.writeAsBytes(bytes);
+      // Only decode if image data is base64 encoded
+      if (image.startsWith('data:image')) {
+        final base64Image =
+            image.replaceAll(RegExp(r'data:image/[^;]+;base64,'), "");
+        final bytes = base64Decode(base64Image);
+        Directory downloadDirectory = await getTemporaryDirectory();
+        final imagePath =
+            '${downloadDirectory.path}/fodx/templates/${widget.template.id}/${widget.template.id}/$imageName';
+        final imageFile = File(imagePath);
+        imageFile.writeAsBytes(bytes);
+      }
+      // If it's just a filename, the image already exists in the template folder
     }
   }
 
@@ -281,8 +286,8 @@ class _HtmlViewScreenState extends State<HtmlViewScreen> {
 
       await zipTemplate(context, templateName, () async {
         Directory downloadDirectory = await getTemporaryDirectory();
-        final zipFile =
-            File("${downloadDirectory.path}/fodx/templates/$templateName.zip");
+        final zipFile = File(
+            "${downloadDirectory.path}/fodx/templates/$templateName/$templateName.zip");
 
         await adsController.addNewAd(
           zipFile,
@@ -313,9 +318,34 @@ class _HtmlViewScreenState extends State<HtmlViewScreen> {
   Future zipTemplate(
       BuildContext context, String name, Function() onZipping) async {
     Directory downloadDirectory = await getTemporaryDirectory();
-    File zipFile = File("${downloadDirectory.path}/fodx/templates/$name.zip");
-    Directory destinationDir = Directory(
-        "${downloadDirectory.path}/fodx/templates/${widget.template.id}");
+    final oldName = widget.template.id;
+
+    // Rename parent folder to new name if different
+    Directory oldParentDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$oldName");
+    Directory newParentDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$name");
+
+    if (oldParentDir.existsSync() && oldName != name) {
+      oldParentDir.renameSync(newParentDir.path);
+
+      // Also rename inner folder to match
+      Directory innerDir =
+          Directory("${downloadDirectory.path}/fodx/templates/$name/$oldName");
+      Directory newInnerDir =
+          Directory("${downloadDirectory.path}/fodx/templates/$name/$name");
+      if (innerDir.existsSync()) {
+        innerDir.renameSync(newInnerDir.path);
+      }
+    }
+
+    // Create zip at parent level to avoid including itself
+    File zipFile =
+        File("${downloadDirectory.path}/fodx/templates/${name}_temp.zip");
+    File finalZipFile =
+        File("${downloadDirectory.path}/fodx/templates/$name/$name.zip");
+    Directory destinationDir =
+        Directory("${downloadDirectory.path}/fodx/templates/$name");
 
     try {
       ZipFile.createFromDirectory(
@@ -323,6 +353,10 @@ class _HtmlViewScreenState extends State<HtmlViewScreen> {
         sourceDir: destinationDir,
         onZipping: (path, isDirectory, progress) {
           if (progress == 100.toDouble()) {
+            // Move zip to final location
+            if (zipFile.existsSync()) {
+              zipFile.renameSync(finalZipFile.path);
+            }
             Future.delayed(
                 const Duration(seconds: 3), () async => await onZipping());
           } else {}
