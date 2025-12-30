@@ -40,7 +40,8 @@ class TemplatesModel {
   final String id;
   final String description;
   final String file;
-  final String image;
+  final String previewUrl;
+  final String fileUrl;
   final String category;
   final String name;
   final String templateType;
@@ -49,14 +50,15 @@ class TemplatesModel {
       {required this.id,
       required this.description,
       required this.file,
-      required this.image,
+      required this.previewUrl,
+      required this.fileUrl,
       required this.name,
       required this.category,
       required this.templateType});
 
   @override
   String toString() {
-    return 'TemplatesModel(id: $id, description: $description, file: $file, image: $image, category: $category, name: $name, templateType: $templateType)';
+    return 'TemplatesModel(id: $id, description: $description, file: $file, previewUrl: $previewUrl, fileUrl: $fileUrl, category: $category, name: $name, templateType: $templateType)';
   }
 
   Map<String, dynamic> toMap() {
@@ -64,7 +66,8 @@ class TemplatesModel {
       'id': id,
       'description': description,
       'filePath': file,
-      'thumbnail': image,
+      'previewUrl': previewUrl,
+      'fileUrl': fileUrl,
       'templateName': name,
       'category': category,
       'templateType': templateType
@@ -72,14 +75,20 @@ class TemplatesModel {
   }
 
   factory TemplatesModel.fromMap(Map<String, dynamic> map) {
+    // Handle both old and new API response formats
+    final previewUrl = map['previewUrl'] ?? map['thumbnail'] ?? '';
+    final fileUrl = map['fileUrl'] ?? map['filePath'] ?? '';
+
     return TemplatesModel(
-        id: (map["id"] ?? '') as String,
-        description: (map['description'] ?? '') as String,
-        file: (map['filePath'] ?? '') as String,
-        image: (map['thumbnail'] ?? '') as String,
-        name: (map['templateName'] ?? '') as String,
-        templateType: (map['templateType'] ?? 'Image') as String,
-        category: (map['category'] ?? '').toString());
+      id: (map["id"] ?? '') as String,
+      description: (map['description'] ?? '') as String,
+      file: (map['filePath'] ?? '') as String,
+      previewUrl: previewUrl as String,
+      fileUrl: fileUrl as String,
+      name: (map['templateName'] ?? '') as String,
+      templateType: (map['templateType'] ?? 'Image') as String,
+      category: (map['category'] ?? '').toString(),
+    );
   }
 
   String toJson() => json.encode(toMap());

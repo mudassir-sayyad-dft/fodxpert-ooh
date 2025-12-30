@@ -64,13 +64,16 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
   }
 
   String getFileName() {
-    return widget.template.fileName.split("/").last.split(".").first;
+    // Use user-friendly name without UUID/timestamp and trim trailing .zip
+    final short = widget.template.displayShortName();
+    final base = short.replaceAll(RegExp(r'\.zip$', caseSensitive: false), '');
+    return base;
   }
 
   Future<String> extractJsonData() async {
     Directory downloadDirectory = await getTemporaryDirectory();
     final file = File(
-        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/data.json');
+        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/data.json');
 
     if (!file.existsSync()) {
       print("Error: JSON file does not exist at path: ${file.path}");
@@ -86,7 +89,7 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
   overwriteJson(String json) async {
     Directory downloadDirectory = await getTemporaryDirectory();
     final file = File(
-        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/data.json');
+        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/data.json');
     final data = "data=$json";
     file.writeAsStringSync(data);
   }
@@ -159,7 +162,7 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
                 if (d[i].type == TemplateDataType.IMAGE ||
                     d[i].type == TemplateDataType.VIDEO) {
                   var path =
-                      "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/${jsonData[i].value}";
+                      "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/${jsonData[i].value}";
                   var newValue = d
                       .where((element) => element.key == jsonData[i].key)
                       .first;
@@ -269,7 +272,7 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
     showDialog(
         context: context,
         builder: (context) => SaveTemplateConfirmationDialog(onSave: () async {
-              await saveImageJson(getFileName().split("-").last);
+              await saveImageJson(getFileName());
             }));
   }
 
@@ -322,7 +325,7 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
       await zipTemplate(context, templateName, () async {
         Directory downloadDirectory = await getTemporaryDirectory();
         final zipFile = File(
-            "${downloadDirectory.path}/fodx/templates/${getFileName()}.zip");
+            "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}.zip");
 
         print("ZipFile Path *************************");
         print(zipFile.path);
@@ -365,10 +368,14 @@ class _EditVideoTemplateScreenState extends State<EditVideoTemplateScreen> {
   Future zipTemplate(
       BuildContext context, String name, Function() onZipping) async {
     Directory downloadDirectory = await getTemporaryDirectory();
-    File zipFile =
-        File("${downloadDirectory.path}/fodx/templates/${getFileName()}.zip");
+    File zipFile = File(
+        "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}.zip");
     Directory destinationDir =
         Directory("${downloadDirectory.path}/fodx/templates/${getFileName()}");
+
+    if (!destinationDir.existsSync()) {
+      destinationDir.createSync(recursive: true);
+    }
 
     try {
       ZipFile.createFromDirectory(

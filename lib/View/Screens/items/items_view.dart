@@ -115,10 +115,11 @@ class _ItemsViewState extends State<ItemsView> {
 
       print("Template file url *************************");
       print(template.file);
-      bool downloaded =
-          await FileStorage.downloadAndSaveImage(template.file, template.id);
+      bool downloaded = await FileStorage.downloadAndSaveImage(
+          template.fileUrl, template.id,
+          templateName: template.name);
       String p =
-          "$temporaryDirectoryPath/templates/${template.id}/${template.id}/index.html";
+          "$temporaryDirectoryPath/templates/${template.id}/${template.name}/index.html";
       if (downloaded) {
         await unzipTemplate(context, template.id, () {
           print("Template Type");
@@ -143,8 +144,9 @@ class _ItemsViewState extends State<ItemsView> {
   Future unzipTemplate(var context, String file, Function() onComplete) async {
     late Directory destinationDir;
     late File zipFile;
-    zipFile = File("$temporaryDirectoryPath/templates/$file/$file.zip");
-    destinationDir = Directory("$temporaryDirectoryPath/templates/$file");
+    zipFile = File(
+        "$temporaryDirectoryPath/templates/${file}/${file.split('/').last}.zip");
+    destinationDir = Directory("$temporaryDirectoryPath/templates/${file}");
     try {
       if (!await Directory("${destinationDir.path}/$file").exists()) {
         await Directory("${destinationDir.path}/$file").delete(recursive: true);
@@ -318,7 +320,7 @@ class _ItemsViewState extends State<ItemsView> {
                                                       BorderRadius.circular(
                                                           8.r),
                                                   child: Image.network(
-                                                      videosList[i].image,
+                                                      videosList[i].previewUrl,
                                                       fit: BoxFit.cover)),
                                             ),
                                             AppServices.addHeight(5),

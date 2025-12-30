@@ -116,6 +116,13 @@ class AdsModel implements Comparable<AdsModel> {
       decoded = name;
     }
 
+    // Strip leading UUID prefix (e.g. `a87b4a8c-6036-40d0-801a-cdc836fb1037-`)
+    final uuidPrefix =
+        RegExp(r'^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}-');
+    if (uuidPrefix.hasMatch(decoded)) {
+      decoded = decoded.replaceFirst(uuidPrefix, '');
+    }
+
     // Remove leading timestamp-like prefix `digits-` if present
     final parts = decoded.split('-');
     if (parts.length > 1) {

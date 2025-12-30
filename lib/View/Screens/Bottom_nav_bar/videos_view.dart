@@ -553,17 +553,16 @@ class _VideosViewState extends State<VideosView> {
 
     /// Generate a clean filename without query parameters or special characters
     String getCleanFileName() {
-      // Use displayShortName() from AdsModel which already handles cleanup
-      // Then remove any remaining special characters and query params
-      String name =
-          template.displayShortName().replaceAll(RegExp(r'[^\w.-]'), '_');
-      // Remove leading/trailing underscores
-      name = name.replaceAll(RegExp(r'^_+|_+$'), '');
-      // If name is still too long, use a UUID-based fallback
-      if (name.isEmpty || name.length > 100) {
-        name = 'template_${DateTime.now().millisecondsSinceEpoch}';
+      // Use displayShortName() which strips UUID/timestamp prefixes
+      // Then strip the trailing `.zip` extension to get the base folder name.
+      String nameWithExt = template.displayShortName();
+      String base =
+          nameWithExt.replaceAll(RegExp(r'\.zip$', caseSensitive: false), '');
+      // Keep spaces and common characters; fall back if empty/too long
+      if (base.isEmpty || base.length > 150) {
+        base = 'template_${DateTime.now().millisecondsSinceEpoch}';
       }
-      return name;
+      return base;
     }
 
     controller.setLoading(true);
@@ -594,6 +593,7 @@ class _VideosViewState extends State<VideosView> {
 
       bool downloaded =
           await FileStorage.downloadAndSaveImage(downloadUrl, cleanFileName);
+      // Path to index.html inside the unzipped folder structure
       String p =
           "$temporaryDirectoryPath/templates/$cleanFileName/$cleanFileName/index.html";
       if (downloaded) {
@@ -631,7 +631,8 @@ class _VideosViewState extends State<VideosView> {
     zipFile = File("$temporaryDirectoryPath/templates/$file/$file.zip");
     destinationDir = Directory("$temporaryDirectoryPath/templates/$file");
     try {
-      if (!await Directory("${destinationDir.path}/$file").exists()) {
+      // Delete inner folder if it exists to ensure a clean unzip target
+      if (await Directory("${destinationDir.path}/$file").exists()) {
         await Directory("${destinationDir.path}/$file").delete(recursive: true);
       }
     } catch (e) {

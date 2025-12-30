@@ -28,13 +28,16 @@ class EditTemplateHtmlViewScreen extends StatefulWidget {
 class _EditTemplateHtmlViewScreenState
     extends State<EditTemplateHtmlViewScreen> {
   String getFileName() {
-    return widget.template.fileName.split("/").last.split(".").first;
+    // Prefer the user-friendly name stripped of UUID/timestamp and `.zip`
+    final short = widget.template.displayShortName();
+    final base = short.replaceAll(RegExp(r'\.zip$', caseSensitive: false), '');
+    return base;
   }
 
   readTeampleFromLocalStorage() async {
     Directory downloadDirectory = await getTemporaryDirectory();
     final file = File(
-        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/index.html');
+        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/index.html');
     final data = file.readAsStringSync();
 
     templateData(data);
@@ -49,7 +52,7 @@ class _EditTemplateHtmlViewScreenState
   loadTemplateData() async {
     Directory downloadDirectory = await getTemporaryDirectory();
     final file = File(
-        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/data.json');
+        '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/data.json');
     var data = file.readAsStringSync();
     data = data.contains("=") ? data.split("=")[1] : data;
     tempJson = json.decode(data);
@@ -99,7 +102,7 @@ class _EditTemplateHtmlViewScreenState
           html(html.value.replaceAll(data.key, data.value));
         } else {
           final bytes = await File(
-                  "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/${data.value}")
+                  "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/${data.value}")
               .readAsBytes();
           // final buffer = bytes.buffer;
 
@@ -144,7 +147,7 @@ class _EditTemplateHtmlViewScreenState
         } else {
           Directory downloadDirectory = await getTemporaryDirectory();
           final bytes = await File(
-                  "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/${data2.value}")
+                  "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/${data2.value}")
               .readAsBytes();
 
           // Convert the bytes to a Base64 string
@@ -196,8 +199,7 @@ class _EditTemplateHtmlViewScreenState
       children: [
         Scaffold(
           appBar: AppBar(
-            title: Text(getFileName().split("-").last,
-                style: const TextStyle(fontSize: 16)),
+            title: Text(getFileName(), style: const TextStyle(fontSize: 16)),
             actions: [
               TextButton.icon(
                   onPressed: () {
@@ -237,7 +239,7 @@ class _EditTemplateHtmlViewScreenState
 
         Directory downloadDirectory = await getTemporaryDirectory();
         final imagePath =
-            '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/$imageName';
+            '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/$imageName';
         print("Image Path ***********");
         print(imagePath);
         print("********************************");
@@ -253,7 +255,7 @@ class _EditTemplateHtmlViewScreenState
     showDialog(
         context: context,
         builder: (context) => SaveTemplateConfirmationDialog(onSave: () async {
-              await saveImageJson(getFileName().split("-").last);
+              await saveImageJson(getFileName());
             }));
   }
 
@@ -263,7 +265,7 @@ class _EditTemplateHtmlViewScreenState
     try {
       Directory downloadDirectory = await getTemporaryDirectory();
       final file = File(
-          '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName().split("-").last}/data.json');
+          '${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}/data.json');
 
       for (var i = 0; i < jsonFile.value.length; i++) {
         for (var j = 0;
@@ -293,7 +295,7 @@ class _EditTemplateHtmlViewScreenState
       await zipTemplate(context, templateName, () async {
         Directory downloadDirectory = await getTemporaryDirectory();
         final zipFile = File(
-            "${downloadDirectory.path}/fodx/templates/${getFileName()}.zip");
+            "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}.zip");
 
         await Future.delayed(const Duration(milliseconds: 1200));
         print("Ads Controller Add new add function");
@@ -327,8 +329,13 @@ class _EditTemplateHtmlViewScreenState
     Directory downloadDirectory = await getTemporaryDirectory();
     Directory destinationDir =
         Directory("${downloadDirectory.path}/fodx/templates/${getFileName()}");
-    File zipFile =
-        File("${downloadDirectory.path}/fodx/templates/${getFileName()}.zip");
+    // Place the zip inside the template folder so unzip/download paths stay consistent
+    File zipFile = File(
+        "${downloadDirectory.path}/fodx/templates/${getFileName()}/${getFileName()}.zip");
+
+    if (!destinationDir.existsSync()) {
+      destinationDir.createSync(recursive: true);
+    }
 
     if (zipFile.existsSync()) {
       zipFile.deleteSync();

@@ -28,14 +28,38 @@ class FileStorage {
     return "${directory.path}/fodx/templates";
   }
 
-  static Future<bool> downloadAndSaveImage(String url, String id) async {
+  static Future<bool> downloadAndSaveImage(String url, String id,
+      {String? templateName}) async {
     var response = await http.get(Uri.parse(url));
     Uint8List bytes = response.bodyBytes;
 
-    // Generate a timestamp for the filename
-    // String timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    // Extract filename from URL or use provided templateName
+    String urlFilename = basename(url).split("?").first; // Remove query params
+    String fileName;
 
-    String fileName = '$id.${basename(url).split(".").last}';
+    if (templateName != null && templateName.isNotEmpty) {
+      // Use provided template name and extract extension from URL
+      String extension =
+          urlFilename.contains('.') ? urlFilename.split('.').last : 'zip';
+      fileName = '$templateName.$extension';
+    } else {
+      // Strip UUID prefix if filename follows pattern: "uuid-filename"
+      // Example: "27311fb0-712e-43a6-b881-b2ba9474d8fc-Menu-1.zip" -> "Menu-1.zip"
+      if (urlFilename.contains('-') &&
+          urlFilename.split('-').first.length == 36) {
+        // UUID is 36 chars (32 hex + 4 hyphens)
+        fileName = urlFilename.substring(37); // Skip UUID and hyphen
+      } else {
+        fileName = urlFilename;
+      }
+    }
+
+    // If we're dealing with a zip, force a consistent local name: <id>.zip
+    final ext = fileName.toLowerCase();
+    if (ext.endsWith('.zip')) {
+      fileName = '$id.zip';
+    }
+
     String filePath = join(await _localPath, id, fileName);
     File file = File(filePath);
     Directory dir = Directory(join(await _localPath, id));
@@ -50,11 +74,11 @@ class FileStorage {
       }
 
       await file.writeAsBytes(bytes, flush: true);
-      print('Image saved to: $filePath');
-      return true; // Move the return statement inside the try block
+      print('Template saved to: $filePath');
+      return true;
     } catch (e) {
-      print('Error saving image: $e');
-      rethrow; // Rethrow the exception to handle it elsewhere if needed
+      print('Error saving template: $e');
+      rethrow;
     }
   }
 }
