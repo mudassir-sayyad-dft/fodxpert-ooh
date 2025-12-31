@@ -137,7 +137,8 @@ class _HtmlPreviewScreenState extends State<HtmlPreviewScreen> {
             : File(
                 '${getApplicationDocumentsDirectory()}/fodx/templates/$templateName.zip');
 
-        await adsController.addNewAd(zipFile,
+        // Fire-and-forget upload
+        final uploadId = await adsController.addNewAd(zipFile,
             fileName: zipFile.path.split("/").last,
             isZip: true,
             sampleTemplateName: widget.template.name);
@@ -145,7 +146,8 @@ class _HtmlPreviewScreenState extends State<HtmlPreviewScreen> {
           zipFile.deleteSync();
         }
         if (mounted) {
-          await Future.delayed(const Duration(seconds: 5));
+          // Don't wait for upload, navigate immediately
+          await Future.delayed(const Duration(seconds: 2));
           AppServices.pushAndRemoveUntil(RouteConstants.welcome_lounge_view);
           AppServices.pushTo(RouteConstants.bottom_nav_bar, argument: true);
         }

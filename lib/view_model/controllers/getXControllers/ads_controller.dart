@@ -14,6 +14,7 @@ import 'package:fodex_new/res/colors.dart';
 import 'package:fodex_new/res/utils/utils.dart';
 import 'package:fodex_new/res/utils/video_compression_utils.dart';
 import 'package:fodex_new/view_model/controllers/function_controller.dart';
+import 'package:fodex_new/view_model/controllers/upload_service.dart';
 import 'package:fodex_new/view_model/models/Ads/ads_model.dart';
 import 'package:fodex_new/view_model/models/screens_model/screens_model.dart';
 import 'package:get/get.dart';
@@ -55,6 +56,7 @@ class AdsController extends GetxController {
   }
 
   final _repo = AdsRepository();
+  late UploadService _uploadService;
 
   List<AdsModel> _ads = [];
 
@@ -68,6 +70,12 @@ class AdsController extends GetxController {
   pushAd(AdsModel ad) {
     _ads.add(ad);
     update();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _uploadService = Get.find<UploadService>();
   }
 
   _updateAdIndex(int index) {}
@@ -141,7 +149,7 @@ class AdsController extends GetxController {
     setLoading(false);
   }
 
-  Future<void> addNewAd(File file,
+  Future<String?> addNewAd(File file,
       {required String fileName,
       File? previousFile,
       required String sampleTemplateName,
@@ -149,13 +157,60 @@ class AdsController extends GetxController {
       String templateType = "",
       bool compressVideo = true,
       VideoQuality quality = VideoQuality.medium}) async {
-    // setLoading(true);
     try {
-      print("Add new add try working here --->>");
+      print("Add new ad - starting background upload");
 
+      // Create upload task
+      final uploadId = _uploadService.createUploadTask(
+        fileName: fileName,
+        screenName: _selectedScreenName,
+        screenId: _selectedScreen,
+      );
+
+      _uploadService.updateState(uploadId, UploadState.uploading);
+
+      // Start upload in background
+      _performBackgroundUpload(
+        uploadId: uploadId,
+        file: file,
+        fileName: fileName,
+        previousFile: previousFile,
+        sampleTemplateName: sampleTemplateName,
+        isZip: isZip,
+        templateType: templateType,
+        compressVideo: compressVideo,
+        quality: quality,
+      );
+
+      // Show info that upload is in progress
+      Utils.showInfoSnackbar(
+        message: "Upload started. You can continue working...",
+      );
+
+      return uploadId;
+    } catch (e) {
+      print("Error in addNewAd");
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  /// Performs the actual upload in background without blocking UI
+  Future<void> _performBackgroundUpload({
+    required String uploadId,
+    required File file,
+    required String fileName,
+    File? previousFile,
+    required String sampleTemplateName,
+    required bool isZip,
+    required String templateType,
+    required bool compressVideo,
+    required VideoQuality quality,
+  }) async {
+    try {
       File processedFile = file;
 
-      // Compress video if it's not a zip and compression is enabled
+      // Compress video if needed
       if (!isZip &&
           FunctionsController.checkFileIsVideo(fileName) &&
           compressVideo) {
@@ -163,9 +218,6 @@ class AdsController extends GetxController {
           final originalSize = await VideoCompressionUtils.getFileSizeMB(file);
           print("Original video size: ${originalSize.toStringAsFixed(2)} MB");
 
-          Utils.showInfoSnackbar(
-              message: "Compressing video for faster upload...");
-
           processedFile = await VideoCompressionUtils.compressVideo(
             file,
             quality: quality,
@@ -179,71 +231,112 @@ class AdsController extends GetxController {
 
           print(
               "Compressed video size: ${compressedSize.toStringAsFixed(2)} MB (Saved $savedPercentage%)");
-          Utils.showSuccessSnackbar(
-            message:
-                "Video compressed successfully! Saved $savedPercentage% space",
-          );
         } catch (e) {
           print("Compression failed: $e");
-          Utils.showErrorSnackbar(
-              message: "Compression failed, uploading original video");
-          // Fall back to original file if compression fails
           processedFile = file;
         }
       }
 
-      final response = await _repo.addNewAd(
-          file: processedFile,
-          _selectedScreen,
-          fileName: fileName,
-          screenName: _selectedScreenName,
-          sampleTemplateName: sampleTemplateName,
-          templateType: templateType);
+      _uploadService.updateState(uploadId, UploadState.polling);
 
-      if (previousFile != null) {
-        if (await previousFile.exists()) {
-          await previousFile.delete();
-        }
+      final response = await _repo.addNewAd(
+        file: processedFile,
+        _selectedScreen,
+        fileName: fileName,
+        screenName: _selectedScreenName,
+        sampleTemplateName: sampleTemplateName,
+        templateType: templateType,
+      );
+
+      // Cleanup files
+      if (previousFile != null && await previousFile.exists()) {
+        await previousFile.delete();
       }
 
-      // Delete compressed file if different from original
       if (processedFile.path != file.path && await processedFile.exists()) {
         await processedFile.delete();
       }
 
-      // if (!isZip) {
       if (await file.exists()) {
         await file.delete();
-        // Utils.showSuccessSnackbar(
-        //     message: "Condition working step 4 done........");
-        // }
       }
 
-      // await downloadFile(url: response.fileName);
-      // await response.generateThumbnail();
-      // Utils.showSuccessSnackbar(message: "Got Thumbail step 5 done........");
-      // Refresh list so videos_view shows the latest creatives immediately
+      // Mark as completed
+      _uploadService.markCompleted(uploadId, response);
+
+      // Refresh ads list
       await getAds();
+
+      Utils.showSuccessSnackbar(
+        message: "Upload completed successfully!",
+      );
     } catch (e) {
-      print("Error in addNewAd");
-      print(e.toString());
-      rethrow;
-      // Utils.showErrorSnackbar(message: e.toString());
+      print("Background upload error: $e");
+      _uploadService.markFailed(uploadId, e.toString());
+      Utils.showErrorSnackbar(
+        message: "Upload failed: ${e.toString()}",
+      );
     }
   }
 
-  Future<void> updateAd(File file,
+  Future<String?> updateAd(File file,
       {required String previousFileNetworkUrl,
       required String previousFileUrl,
       bool isZip = false,
       String templateType = "",
       bool compressVideo = true,
       VideoQuality quality = VideoQuality.medium}) async {
-    // setLoading(true);
+    try {
+      print("Update ad - starting background upload");
+
+      // Create upload task
+      final uploadId = _uploadService.createUploadTask(
+        fileName: previousFileNetworkUrl.split("/").last,
+        screenName: _selectedScreenName,
+        screenId: _selectedScreen,
+      );
+
+      _uploadService.updateState(uploadId, UploadState.uploading);
+
+      // Start upload in background
+      _performBackgroundUpdate(
+        uploadId: uploadId,
+        file: file,
+        previousFileNetworkUrl: previousFileNetworkUrl,
+        previousFileUrl: previousFileUrl,
+        isZip: isZip,
+        templateType: templateType,
+        compressVideo: compressVideo,
+        quality: quality,
+      );
+
+      Utils.showInfoSnackbar(
+        message: "Update started. You can continue working...",
+      );
+
+      return uploadId;
+    } catch (e) {
+      print("Error in updateAd");
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  /// Performs the actual update in background without blocking UI
+  Future<void> _performBackgroundUpdate({
+    required String uploadId,
+    required File file,
+    required String previousFileNetworkUrl,
+    required String previousFileUrl,
+    required bool isZip,
+    required String templateType,
+    required bool compressVideo,
+    required VideoQuality quality,
+  }) async {
     try {
       File processedFile = file;
 
-      // Compress video if it's not a zip and compression is enabled
+      // Compress video if needed
       if (!isZip &&
           FunctionsController.checkFileIsVideo(file.path) &&
           compressVideo) {
@@ -251,9 +344,6 @@ class AdsController extends GetxController {
           final originalSize = await VideoCompressionUtils.getFileSizeMB(file);
           print("Original video size: ${originalSize.toStringAsFixed(2)} MB");
 
-          Utils.showInfoSnackbar(
-              message: "Compressing video for faster upload...");
-
           processedFile = await VideoCompressionUtils.compressVideo(
             file,
             quality: quality,
@@ -267,27 +357,21 @@ class AdsController extends GetxController {
 
           print(
               "Compressed video size: ${compressedSize.toStringAsFixed(2)} MB (Saved $savedPercentage%)");
-          Utils.showSuccessSnackbar(
-            message:
-                "Video compressed successfully! Saved $savedPercentage% space",
-          );
         } catch (e) {
           print("Compression failed: $e");
-          Utils.showErrorSnackbar(
-              message: "Compression failed, uploading original video");
           processedFile = file;
         }
       }
 
+      _uploadService.updateState(uploadId, UploadState.polling);
+
       final response = await _repo.updateCreative(
-          screenName: _selectedScreenName,
-          file: processedFile,
-          screenId: selectedScreen,
-          fileName: previousFileNetworkUrl.split("/").last,
-          templateType: templateType);
-      print(response);
-      print(response.fileName);
-      print('*****************');
+        screenName: _selectedScreenName,
+        file: processedFile,
+        screenId: selectedScreen,
+        fileName: previousFileNetworkUrl.split("/").last,
+        templateType: templateType,
+      );
 
       // Delete compressed file if different from original
       if (processedFile.path != file.path && await processedFile.exists()) {
@@ -302,13 +386,26 @@ class AdsController extends GetxController {
       } else {
         await response.generateVideoTemplateThumbnail();
       }
+
       if (previousFileUrl.isNotEmpty && await File(previousFileUrl).exists()) {
         await File(previousFileUrl).delete();
       }
+
+      // Update the ad in list
       _updateAdData(response, previousFileNetworkUrl);
+
+      // Mark as completed
+      _uploadService.markCompleted(uploadId, response);
+
+      Utils.showSuccessSnackbar(
+        message: "Update completed successfully!",
+      );
     } catch (e) {
-      rethrow;
-      // Utils.showErrorSnackbar(message: e.toString());
+      print("Background update error: $e");
+      _uploadService.markFailed(uploadId, e.toString());
+      Utils.showErrorSnackbar(
+        message: "Update failed: ${e.toString()}",
+      );
     }
   }
 

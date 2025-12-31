@@ -9,6 +9,7 @@ import 'package:fodex_new/View/Components/Loaders/full_screen_loader.dart';
 import 'package:fodex_new/View/Components/dialogs/delete_ad_confirmation_dialog.dart';
 import 'package:fodex_new/View/Components/empty_data_view.dart';
 import 'package:fodex_new/View/Components/primary_app_bar.dart';
+import 'package:fodex_new/View/Components/uploading_ad_shimmer.dart';
 import 'package:fodex_new/View/Screens/image/image_editor.dart';
 import 'package:fodex_new/main.dart';
 import 'package:fodex_new/res/base_getters.dart';
@@ -18,6 +19,7 @@ import 'package:fodex_new/res/utils/utils.dart';
 import 'package:fodex_new/view_model/controllers/function_controller.dart';
 import 'package:fodex_new/view_model/controllers/getXControllers/ads_controller.dart';
 import 'package:fodex_new/view_model/controllers/getXControllers/templates_controller.dart';
+import 'package:fodex_new/view_model/controllers/upload_service.dart';
 import 'package:fodex_new/view_model/models/Ads/ads_model.dart';
 import 'package:fodex_new/view_model/models/templates/file_storage.dart';
 import 'package:get/get.dart';
@@ -308,179 +310,226 @@ class _VideosViewState extends State<VideosView> {
                                         )
                                       : const SizedBox(),
                               Expanded(
-                                child: ReorderableListView(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 20.w, vertical: 24.h),
-                                  onReorder: (int oldIndex, int newIndex) {
-                                    try {
-                                      _controller.pause();
-                                    } catch (e) {}
-                                    setState(() {
-                                      if (oldIndex < newIndex) {
-                                        newIndex -= 1;
+                                child: Obx(() {
+                                  final uploadService =
+                                      Get.find<UploadService>();
+                                  final uploadingTasks = uploadService
+                                      .getActiveUploads()
+                                      .where((task) =>
+                                          task.screenId ==
+                                          adsController.selectedScreen)
+                                      .toList();
+
+                                  return ReorderableListView(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 20.w, vertical: 24.h),
+                                    onReorder: (int oldIndex, int newIndex) {
+                                      // Only allow reordering of actual ads, not uploading tasks
+                                      if (oldIndex >= uploadingTasks.length &&
+                                          newIndex >= uploadingTasks.length) {
+                                        try {
+                                          _controller.pause();
+                                        } catch (e) {}
+                                        setState(() {
+                                          if (oldIndex < newIndex) {
+                                            newIndex -= 1;
+                                          }
+                                          final item = ads.removeAt(
+                                              oldIndex - uploadingTasks.length);
+                                          ads.insert(
+                                              newIndex - uploadingTasks.length,
+                                              item);
+                                          adsController
+                                              .updatePlaylistForScreen(ads);
+                                        });
                                       }
-                                      final item = ads.removeAt(oldIndex);
-                                      ads.insert(newIndex, item);
-                                      adsController
-                                          .updatePlaylistForScreen(ads);
-                                    });
-                                  },
-                                  children: List.generate(ads.length, (index) {
-                                    final ad = ads[index];
-                                    return Padding(
-                                      key: Key(ad.fileName +
-                                          ad.index.toString() +
-                                          index.toString()),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 7),
-                                      child: InkWell(
-                                        onTap: () {
-                                          currentVideoIndex = index;
-                                          try {
-                                            _controller.pause();
-                                            _controller.dispose();
-                                          } catch (e) {}
-                                          _initializeVideoController();
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(4.sp),
-                                          decoration: BoxDecoration(
-                                              color: GetColors.white,
-                                              boxShadow: currentVideoIndex ==
-                                                      index
-                                                  ? [
-                                                      BoxShadow(
-                                                          blurRadius: 8.r,
-                                                          spreadRadius: 0.5.r,
-                                                          offset: const Offset(
-                                                              4, 4),
-                                                          color: GetColors.black
-                                                              .withValues(
-                                                                  alpha: 0.25))
-                                                    ]
-                                                  : null),
-                                          child: Row(
-                                            children: [
-                                              ThumbnailPreviewWithGenerateThumbnailOfVideo(
-                                                  ad: ad),
-                                              AppServices.addWidth(20),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      ad.displayShortName(),
-                                                      maxLines: 3,
-                                                      style:
-                                                          textTheme.fs_14_bold,
-                                                    ),
-                                                    AppServices.addHeight(4.h),
-                                                    Text(
-                                                      ad.checkIsVideo()
-                                                          ? "Video"
-                                                          : ad.checkIsImage()
-                                                              ? "Image"
-                                                              : "Zip",
-                                                      style: textTheme
-                                                          .fs_14_regular
-                                                          .copyWith(
-                                                              color: GetColors
-                                                                  .secondary),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              PopupMenuButton(
-                                                  color: GetColors.white,
-                                                  surfaceTintColor:
-                                                      GetColors.white,
-                                                  onSelected: (v) async {
-                                                    if (v == "Edit") {
-                                                      onEdit(ad);
-                                                    } else if (v ==
-                                                        "Download") {
-                                                      onDownload(
-                                                          ad, adsController);
-                                                    } else {
-                                                      showDialog(
-                                                          context: context,
-                                                          builder: (context) {
-                                                            return DeleteAdConfirmationDialog(
-                                                                isVideo: ad
-                                                                    .checkIsVideo(),
-                                                                onDelete: () =>
-                                                                    onDelete(ad
-                                                                        .displayName));
-                                                          });
-                                                    }
-                                                  },
-                                                  itemBuilder: (ctx) => [
-                                                        PopupMenuItem(
-                                                            value: "Edit",
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(
-                                                                    Icons
-                                                                        .edit_square,
-                                                                    size:
-                                                                        20.sp),
-                                                                AppServices
-                                                                    .addWidth(
-                                                                        10),
-                                                                Text(
-                                                                  "Edit",
-                                                                  style: textTheme
-                                                                      .fs_16_regular,
-                                                                )
-                                                              ],
-                                                            )),
-                                                        PopupMenuItem(
-                                                            value: "Delete",
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(
-                                                                    Icons
-                                                                        .delete,
-                                                                    size:
-                                                                        20.sp),
-                                                                AppServices
-                                                                    .addWidth(
-                                                                        10),
-                                                                Text(
-                                                                  "Delete",
-                                                                  style: textTheme
-                                                                      .fs_16_regular,
-                                                                )
-                                                              ],
-                                                            )),
-                                                        PopupMenuItem(
-                                                            value: "Download",
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(
-                                                                    Icons
-                                                                        .download,
-                                                                    size:
-                                                                        20.sp),
-                                                                AppServices
-                                                                    .addWidth(
-                                                                        10),
-                                                                Text(
-                                                                  "Download",
-                                                                  style: textTheme
-                                                                      .fs_16_regular,
-                                                                )
-                                                              ],
-                                                            )),
-                                                      ])
-                                            ],
+                                    },
+                                    children: [
+                                      // Show uploading tasks first
+                                      ...uploadingTasks.map((task) {
+                                        return Padding(
+                                          key: Key('upload_${task.id}'),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 7),
+                                          child: UploadingAdShimmer(
+                                            fileName: task.fileName,
+                                            progress: task.state ==
+                                                    UploadState.polling
+                                                ? null
+                                                : task.progress,
+                                            isLongRunning:
+                                                task.showTimeoutWarning,
                                           ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                ),
+                                        );
+                                      }).toList(),
+                                      // Show actual ads
+                                      ...List.generate(ads.length, (index) {
+                                        final ad = ads[index];
+                                        return Padding(
+                                          key: Key(ad.fileName +
+                                              ad.index.toString() +
+                                              index.toString()),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 7),
+                                          child: InkWell(
+                                            onTap: () {
+                                              currentVideoIndex = index;
+                                              try {
+                                                _controller.pause();
+                                                _controller.dispose();
+                                              } catch (e) {}
+                                              _initializeVideoController();
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(4.sp),
+                                              decoration: BoxDecoration(
+                                                  color: GetColors.white,
+                                                  boxShadow:
+                                                      currentVideoIndex == index
+                                                          ? [
+                                                              BoxShadow(
+                                                                  blurRadius:
+                                                                      8.r,
+                                                                  spreadRadius:
+                                                                      0.5.r,
+                                                                  offset:
+                                                                      const Offset(
+                                                                          4, 4),
+                                                                  color: GetColors
+                                                                      .black
+                                                                      .withValues(
+                                                                          alpha:
+                                                                              0.25))
+                                                            ]
+                                                          : null),
+                                              child: Row(
+                                                children: [
+                                                  ThumbnailPreviewWithGenerateThumbnailOfVideo(
+                                                      ad: ad),
+                                                  AppServices.addWidth(20),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          ad.displayShortName(),
+                                                          maxLines: 3,
+                                                          style: textTheme
+                                                              .fs_14_bold,
+                                                        ),
+                                                        AppServices.addHeight(
+                                                            4.h),
+                                                        Text(
+                                                          ad.checkIsVideo()
+                                                              ? "Video"
+                                                              : ad.checkIsImage()
+                                                                  ? "Image"
+                                                                  : "Zip",
+                                                          style: textTheme
+                                                              .fs_14_regular
+                                                              .copyWith(
+                                                                  color: GetColors
+                                                                      .secondary),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  PopupMenuButton(
+                                                      color: GetColors.white,
+                                                      surfaceTintColor:
+                                                          GetColors.white,
+                                                      onSelected: (v) async {
+                                                        if (v == "Edit") {
+                                                          onEdit(ad);
+                                                        } else if (v ==
+                                                            "Download") {
+                                                          onDownload(ad,
+                                                              adsController);
+                                                        } else {
+                                                          showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (context) {
+                                                                return DeleteAdConfirmationDialog(
+                                                                    isVideo: ad
+                                                                        .checkIsVideo(),
+                                                                    onDelete: () =>
+                                                                        onDelete(
+                                                                            ad.displayName));
+                                                              });
+                                                        }
+                                                      },
+                                                      itemBuilder: (ctx) => [
+                                                            PopupMenuItem(
+                                                                value: "Edit",
+                                                                child: Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                        Icons
+                                                                            .edit_square,
+                                                                        size: 20
+                                                                            .sp),
+                                                                    AppServices
+                                                                        .addWidth(
+                                                                            10),
+                                                                    Text(
+                                                                      "Edit",
+                                                                      style: textTheme
+                                                                          .fs_16_regular,
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                            PopupMenuItem(
+                                                                value: "Delete",
+                                                                child: Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                        Icons
+                                                                            .delete,
+                                                                        size: 20
+                                                                            .sp),
+                                                                    AppServices
+                                                                        .addWidth(
+                                                                            10),
+                                                                    Text(
+                                                                      "Delete",
+                                                                      style: textTheme
+                                                                          .fs_16_regular,
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                            PopupMenuItem(
+                                                                value:
+                                                                    "Download",
+                                                                child: Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                        Icons
+                                                                            .download,
+                                                                        size: 20
+                                                                            .sp),
+                                                                    AppServices
+                                                                        .addWidth(
+                                                                            10),
+                                                                    Text(
+                                                                      "Download",
+                                                                      style: textTheme
+                                                                          .fs_16_regular,
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                          ])
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ],
+                                  );
+                                }),
                               ),
                             ],
                           ))

@@ -139,22 +139,24 @@ class _VideoEditorState extends State<VideoEditor> {
           } else {
             try {
               if (widget.fileUrl.isEmpty) {
-                await Get.find<AdsController>().addNewAd(file,
+                // Fire-and-forget upload - returns upload ID, doesn't wait for completion
+                final uploadId = await Get.find<AdsController>().addNewAd(file,
                     sampleTemplateName: videoName,
                     fileName: "$videoName.${file.path.split(".").last}",
                     previousFile:
                         widget.isFromNetwork == true ? widget.file : null);
-                // await Future.delayed(Duration(milliseconds: 1000));
-                Utils.showSuccessSnackbar(
-                    message: "Your video has been uploaded successfully");
+
+                // Don't show success message yet, let background upload handle it
+                // Pop back immediately so user can continue working
+                Navigator.pop(context);
               } else {
-                await Get.find<AdsController>().updateAd(file,
+                // Fire-and-forget update
+                final uploadId = await Get.find<AdsController>().updateAd(file,
                     previousFileNetworkUrl: widget.fileUrl,
                     previousFileUrl: widget.file.path);
-                Utils.showSuccessSnackbar(
-                    message: "Your video has been uploaded successfully");
+
+                Navigator.pop(context);
               }
-              // AppServices.popView(context);
             } catch (e) {
               Utils.showErrorSnackbar(message: e.toString(), showLogout: true);
             }

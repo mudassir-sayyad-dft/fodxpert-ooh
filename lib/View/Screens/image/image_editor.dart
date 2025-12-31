@@ -133,15 +133,16 @@ class _ImageEditorViewState extends State<ImageEditorView> {
             setState(() => _loading = true);
 
             try {
-              await Get.find<AdsController>().addNewAd(
+              // Fire-and-forget upload - returns upload ID, doesn't wait for completion
+              final uploadId = await Get.find<AdsController>().addNewAd(
                 imgFile,
                 sampleTemplateName: imageName,
                 fileName: "$imageName.$ext",
                 previousFile:
                     widget.isFromNetwork ? File(widget.imagePath) : null,
               );
-              Utils.showSuccessSnackbar(
-                  message: "Your image has been uploaded successfully");
+
+              // Pop immediately, let background upload handle the success message
               AppServices.popView(context);
             } catch (e) {
               Utils.showErrorSnackbar(message: e.toString());
