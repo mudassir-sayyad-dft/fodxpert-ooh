@@ -280,7 +280,7 @@ class AdsRepository {
       return await _apiServices.getPostApiResponse(
         ApiUrl.updatePlaylistForScreenEndPoint,
         jsonEncode({
-          "playlist": ads.map((e) => e.fileName.split("/").last).toList(),
+          "playlist": ads.map((e) => e.displayName.split("/").last).toList(),
           "screenID": screenId,
         }),
         headers: {
