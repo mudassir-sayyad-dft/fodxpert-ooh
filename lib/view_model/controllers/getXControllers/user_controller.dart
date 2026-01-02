@@ -26,9 +26,8 @@ class UserController extends GetxController {
     update();
   }
 
-  updateUserDetails(String firstName, String lastName) {
-    _currentUser.firstName = firstName;
-    _currentUser.lastName = lastName;
+  updateUserDetails(String name) {
+    _currentUser.name = name;
     prefs.put('user', jsonEncode(_currentUser.toJson()));
     update();
   }
@@ -36,6 +35,7 @@ class UserController extends GetxController {
   saveUser(Map<String, dynamic> user, {bool saveStorage = true}) {
     _setCurrentUser(user);
     saveStorage ? prefs.put('user', jsonEncode(_currentUser.toJson())) : null;
+    print("Saved User: ${prefs.get('user')}");
   }
 
   UserModel getUser() {

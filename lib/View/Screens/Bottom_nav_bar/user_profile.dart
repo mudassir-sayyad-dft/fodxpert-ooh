@@ -27,11 +27,8 @@ class _UserProfileViewState extends State<UserProfileView> {
   final TextEditingController _username = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _phone = TextEditingController();
-  // final TextEditingController _oldPassword = TextEditingController();
-  // final TextEditingController _newPassword = TextEditingController();
 
-  final TextEditingController _firstName = TextEditingController();
-  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController name = TextEditingController();
 
   @override
   void initState() {
@@ -88,10 +85,10 @@ class _UserProfileViewState extends State<UserProfileView> {
 
     _username.text = user.userName;
     _email.text = user.email;
-    _phone.text =
-        user.phone.startsWith("+") ? user.phone.substring(3) : user.phone;
-    _firstName.text = user.firstName;
-    _lastName.text = user.lastName;
+    _phone.text = user.phone;
+    // _phone.text =
+    //     user.phone.startsWith("+") ? user.phone.substring(3) : user.phone;
+    name.text = user.name;
     setState(() {});
   }
 
@@ -132,87 +129,42 @@ class _UserProfileViewState extends State<UserProfileView> {
 
                 Text("Update Profile", style: textTheme.fs_16_bold),
                 AppServices.addHeight(15),
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("First Name", style: textTheme.fs_12_regular),
-                          AppServices.addHeight(5),
-                          TextFieldPrimary(
-                              controller: _firstName,
-                              deniedLetters: RegExp(r'[ _]'),
-                              onchange: (v) {
-                                final user =
-                                    Get.find<UserController>().currentUser;
-                                if (v != null &&
-                                    v.trim() == user.firstName.trim() &&
-                                    _lastName.text.trim() ==
-                                        user.lastName.trim()) {
-                                  controller.toggleUpdateProfile(false);
-                                } else {
-                                  controller.toggleUpdateProfile(true);
-                                }
-                              },
-                              prefixIcon: Icons.person,
-                              hint: "Enter First Name"),
-                        ],
-                      ),
-                    ),
-                    AppServices.addWidth(10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Last Name", style: textTheme.fs_12_regular),
-                          AppServices.addHeight(5),
-                          TextFieldPrimary(
-                            controller: _lastName,
-                            deniedLetters: RegExp(r'[ _]'),
-                            onchange: (v) {
-                              final user =
-                                  Get.find<UserController>().currentUser;
-                              if (v != null &&
-                                  v.trim() == user.lastName.trim() &&
-                                  _firstName.text.trim() ==
-                                      user.firstName.trim()) {
-                                controller.toggleUpdateProfile(false);
-                              } else {
-                                controller.toggleUpdateProfile(true);
-                              }
-                            },
-                            prefixIcon: Icons.person,
-                            hint: "Enter Last Name",
-                          ),
-                        ],
-                      ),
-                    )
+                    Text("Name", style: textTheme.fs_12_regular),
+                    AppServices.addHeight(5),
+                    TextFieldPrimary(
+                        controller: name,
+                        deniedLetters: RegExp(r'[ _]'),
+                        onchange: (v) {
+                          final user = Get.find<UserController>().currentUser;
+                          if (v != null && v.trim() == user.name.trim()) {
+                            controller.toggleUpdateProfile(false);
+                          } else {
+                            controller.toggleUpdateProfile(true);
+                          }
+                        },
+                        prefixIcon: Icons.person,
+                        hint: "Enter Name"),
                   ],
                 ),
                 AppServices.addHeight(20),
-                controller.loading
-                    ? const CircularProgressIndicator.adaptive()
-                    : Row(
-                        children: [
-                          ExpandedButton(
-                              onPressed: controller.updateProfile
-                                  ? () async {
-                                      if (_firstName.text.isEmpty &&
-                                          _lastName.text.isEmpty) {
-                                        controller.toggleUpdateProfile(false);
-                                      } else {
-                                        await controller.updateUserProfile(
-                                            _firstName.text, _lastName.text);
-                                      }
-                                    }
-                                  : null,
-                              title: "Update Profile",
-                              color: controller.updateProfile
-                                  ? GetColors.primary
-                                  : GetColors.grey4)
-                        ],
-                      ),
+                ExpandedButton(
+                    onPressed: controller.updateProfile
+                        ? () async {
+                            if (name.text.isEmpty) {
+                              controller.toggleUpdateProfile(false);
+                            } else {
+                              await controller.updateUserProfile(name.text);
+                            }
+                          }
+                        : null,
+                    title:
+                        controller.loading ? "Updating..." : "Update Profile",
+                    color: controller.updateProfile
+                        ? GetColors.primary
+                        : GetColors.grey4)
               ],
             ))
           ],

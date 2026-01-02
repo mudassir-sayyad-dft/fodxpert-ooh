@@ -192,13 +192,12 @@ class AuthRepository {
     }
   }
 
-  Future<dynamic> updateUserDetails(String firstName, String lastName) async {
+  Future<dynamic> updateUserDetails(String name) async {
     try {
       dynamic response = await _apiServices
           .getPostApiResponse(ApiUrl.updateUserDetailsEndPoint, {
         "userName": Get.find<UserController>().currentUser.userName,
-        "firstName": firstName,
-        "lastName": lastName
+        "name": name,
       });
 
       return response;

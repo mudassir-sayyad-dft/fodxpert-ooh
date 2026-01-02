@@ -276,12 +276,12 @@ class AuthController extends GetxController {
     return false;
   }
 
-  Future<bool> updateUserProfile(String firstName, String lastName) async {
+  Future<bool> updateUserProfile(String name) async {
     setLoading(true);
     try {
-      final response = await _repo.updateUserDetails(firstName, lastName);
+      final response = await _repo.updateUserDetails(name);
       if (response != null) {
-        Get.find<UserController>().updateUserDetails(firstName, lastName);
+        Get.find<UserController>().updateUserDetails(name);
         toggleUpdateProfile(false);
         Utils.showSuccessSnackbar(message: "User Details updated successfully");
         setLoading(false);

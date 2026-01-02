@@ -1,8 +1,7 @@
 class UserModel {
   String uid;
   String userName;
-  String firstName;
-  String lastName;
+  String name;
   late String email;
   late String phone;
   String managerID;
@@ -11,13 +10,16 @@ class UserModel {
   UserModel(
       {this.uid = "",
       this.userName = "",
-      this.firstName = "",
-      this.lastName = "",
+      this.name = "",
+      this.phone = "",
       String userIdentification = "",
       this.managerID = "",
       this.tocVersion = ""}) {
     email = getEmail(userIdentification);
-    phone = getPhoneNumber(userIdentification);
+    // Only derive phone from userIdentification when a phone wasn't provided from the backend.
+    if (phone.isEmpty) {
+      phone = getPhoneNumber(userIdentification);
+    }
   }
 
   factory UserModel.fromMap({required Map<String, dynamic> json}) {
@@ -25,8 +27,8 @@ class UserModel {
         uid: json['userID'] ?? '',
         managerID: json['managerID'] ?? '',
         userIdentification: json['userIdentification'] ?? '',
-        firstName: json['firstName'] ?? '',
-        lastName: json['lastName'] ?? '',
+        name: json['name'] ?? '',
+        phone: json['phone'] ?? '',
         userName: json['userName'] ?? '',
         tocVersion: json['tocVersion'] ?? '');
   }
@@ -37,8 +39,7 @@ class UserModel {
         'managerID': managerID,
         'phone': phone,
         'userName': userName,
-        'firstName': firstName,
-        'lastName': lastName,
+        'name': name,
         'tocVersion': tocVersion
       };
 
@@ -47,8 +48,8 @@ class UserModel {
         uid: json['userID'] ?? uid,
         userName: json['userName'] ?? userName,
         managerID: json['managerID'] ?? managerID,
-        firstName: json['firstName'] ?? firstName,
-        lastName: json['lastName'] ?? lastName,
+        name: json['name'] ?? name,
+        phone: json['phone'] ?? phone,
         tocVersion: json['tocVersion'] ?? tocVersion,
         userIdentification: json['userIdentification'] ??
             [email, phone].where((element) => element.isNotEmpty).join());
@@ -75,6 +76,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, userName: $userName, email: $email, phone: $phone, managerID: $managerID, firstName: $firstName, lastName: $lastName, tocVersion: $tocVersion)';
+    return 'UserModel(uid: $uid, userName: $userName, email: $email, phone: $phone, managerID: $managerID, name: $name, tocVersion: $tocVersion)';
   }
 }
